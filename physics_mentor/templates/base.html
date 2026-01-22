@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Physics Mentor</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">Physics<span>Mentor</span></div>
+
+    <ul class="nav-links">
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'courses' %}">Courses</a></li>
+        <li><a href="{% url 'features' %}">Features</a></li>
+        <li><a href="{% url 'testimonials' %}">Testimonials</a></li>
+        <li><a href="{% url 'contact' %}">Contact</a></li>
+    </ul>
+
+    <div class="nav-actions">
+        <a href="{% url 'login' %}" class="login">Log In</a>
+        <a href="{% url 'signup' %}" class="btn-primary">Get Started</a>
+    </div>
+</nav>
+
+<main class="page-container">
+    {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>
