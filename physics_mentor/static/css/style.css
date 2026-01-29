@@ -3,6 +3,7 @@ body {
     font-family: Arial, sans-serif;
     background: #0b1220;
     color: white;
+    overflow-x: hidden;
 }
 
 .navbar {
@@ -406,4 +407,84 @@ body {
 
 .course-cta {
   margin-top: 8px;
+}
+
+
+
+
+/* ================================
+   WhatsApp Floating Button
+   (Always visible while scrolling)
+=================================== */
+
+a.whatsapp-float{
+  position: fixed !important;
+  left: 14px !important;
+  bottom: 14px !important;
+
+  width: 70px !important;     /* reduced size */
+  height: 70px !important;
+
+  background: #25D366 !important;
+  border-radius: 50% !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  z-index: 2147483647 !important;   /* above everything */
+  box-shadow: 0 10px 24px rgba(0,0,0,0.30) !important;
+
+  text-decoration: none !important;
+  transition: 0.25s ease !important;
+}
+
+a.whatsapp-float img{
+  width: 24px !important;
+  height: 24px !important;
+  display: block !important;
+}
+
+a.whatsapp-float:hover{
+  transform: scale(1.08) !important;
+  box-shadow: 0 14px 30px rgba(0,0,0,0.35) !important;
+}
+
+
+
+/* ================================
+   Call Floating Button (Right Side)
+=================================== */
+
+a.call-float{
+  position: fixed !important;
+  right: 14px !important;
+  bottom: 14px !important;
+
+  width: 70px !important;
+  height: 70px !important;
+
+  background: #0EA5E9 !important;  /* blue call button */
+  border-radius: 50% !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  z-index: 2147483647 !important;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.30) !important;
+
+  text-decoration: none !important;
+  transition: 0.25s ease !important;
+}
+
+a.call-float img{
+  width: 22px !important;
+  height: 22px !important;
+  display: block !important;
+}
+
+a.call-float:hover{
+  transform: scale(1.08) !important;
+  box-shadow: 0 14px 30px rgba(0,0,0,0.35) !important;
 }

@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/contact.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- Contact Banner -->
+<section class="contact-hero">
+  <h2>Contact Us</h2>
+</section>
+
+<section class="contact-wrap">
+  <div class="container">
+
+    <!-- 3 Info Cards -->
+    <div class="contact-cards">
+      <div class="c-card">
+        <div class="c-icon">📍</div>
+        <h4>Address</h4>
+        <p>
+          PhysicsMentor <br />
+          Online Learning Platform <br />
+          India (Online Classes)
+        </p>
+      </div>
+
+      <div class="c-card">
+        <div class="c-icon">📞</div>
+        <h4>Contact</h4>
+        <p>
+          +91 XXXXXXXXXX <br />
+          +91 XXXXXXXXXX
+        </p>
+      </div>
+
+      <div class="c-card">
+        <div class="c-icon">✉️</div>
+        <h4>E-mail Id</h4>
+        <p>support@physicsmentor.com</p>
+      </div>
+    </div>
+
+    <!-- ✅ Box Layout (Image + Form inside one card/box) -->
+    <div class="contact-box">
+
+      <!-- Left Image -->
+      <div class="contact-img">
+        <img src="{% static 'images/phy_mentor_img4.jpg' %}" alt="student" />
+      </div>
+
+      <!-- Right Form -->
+      <div class="contact-form">
+        <h3>Get In Query</h3>
+
+        <form method="post">
+  {% csrf_token %}
+
+  <div class="f-col">
+    <label>FULL NAME *</label>
+    <input type="text" name="full_name" placeholder="Enter your full name" required />
+  </div>
+
+  <div class="f-col">
+    <label>PHONE *</label>
+    <input type="text" name="phone" placeholder="Enter your phone number" required />
+  </div>
+
+  <div class="f-col">
+    <label>EMAIL *</label>
+    <input type="email" name="email" placeholder="Enter your email address" required />
+  </div>
+
+  <div class="f-col">
+    <label>CLASS</label>
+    <select name="student_class">
+      <option value="">Select Class</option>
+      <option>Class 9</option>
+      <option>Class 10</option>
+      <option>Class 11</option>
+      <option>Class 12</option>
+      <option>Dropper</option>
+    </select>
+  </div>
+
+  <div class="f-col">
+    <label>SUBJECT</label>
+    <input type="text" name="subject" value="Physics" />
+  </div>
+
+  <div class="f-col">
+    <label>PLACE</label>
+    <input type="text" name="place" placeholder="Enter your city" />
+  </div>
+
+  <div class="f-col">
+    <label>CHOOSE TUITION TYPE</label>
+    <select name="tuition_type">
+      <option value="">Select Tuition Type</option>
+      <option>Online 1:1</option>
+      <option>Online Group</option>
+      <option>Crash Course</option>
+    </select>
+  </div>
+
+  <div class="f-col">
+    <label>MESSAGE</label>
+    <textarea name="message" placeholder="Write your message..." rows="4"></textarea>
+  </div>
+
+  <button type="submit" class="send-btn">SEND MESSAGE</button>
+  <p class="small-note">We usually reply within 24 hours.</p>
+</form>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}

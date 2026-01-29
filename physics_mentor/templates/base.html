@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Physics Mentor</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5">
+     {% block extra_css %}{% endblock %}
 </head>
 <body>
 
@@ -28,6 +29,23 @@
 <main class="page-container">
     {% block content %}{% endblock %}
 </main>
+
+<!-- ✅ WHATSAPP FLOATING BUTTON (ADD HERE) -->
+<a href="https://chat.whatsapp.com/DstRxHVvlGx6XFKBLnIYZO?mode=gi_t"
+   class="whatsapp-float"
+   target="_blank"
+   title="Join our WhatsApp Group">
+    <img src="{% static 'images/whatsapp_logo.jpg' %}" alt="WhatsApp">
+</a>
+
+
+<!-- 📞 Call Floating Button -->
+<a href="tel:+917306737811"
+   class="call-float"
+   title="Call Physics Mentor">
+  <img src="{% static 'images/phncall_icon.png' %}" alt="Call">
+</a>
+
 
 </body>
 </html>
