@@ -41,19 +41,23 @@ h2{
 .contact-box{
   display: grid;
   grid-template-columns: 420px 1fr;
-  background: #fff;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.10);
+  align-items: stretch;       /* ✅ both columns same height */
 }
+
 
 .contact-img{
   background: #f5f7fb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;  
+ min-height: 620px; 
 }
 .contact-img img{
   width: 100%;
   height: 100%;
-  object-fit: cover;
+   object-fit: contain;        /* ✅ FULL image visible */
+  border-radius: 12px;
 }
 
 .contact-form{
