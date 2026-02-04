@@ -19,6 +19,11 @@ def features(request):
 def testimonials(request):
     return render(request, "website/testimonials.html")
 
+def aboutus(request):
+    return render(request, "website/aboutus.html")
+
+
+
 
 
 

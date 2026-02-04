@@ -195,3 +195,23 @@ h2{
 
 
 
+
+
+/* Make intl-tel-input container full width */
+.iti {
+  width: 100% !important;
+}
+
+/* Make phone input same width as other inputs */
+.iti__tel-input {
+  width: 100% !important;
+  height: 48px;
+  font-size: 15px;
+  padding-left: 110px !important; /* space for flag + dial code */
+  box-sizing: border-box;
+}
+
+/* Align spacing with other form fields */
+.contact-form .iti {
+  margin-bottom: 14px;
+}

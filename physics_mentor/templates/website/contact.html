@@ -125,3 +125,53 @@
 </section>
 
 {% endblock %}
+
+
+{% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const phoneInput = document.querySelector("#id_phone");
+    const countrySelect = document.querySelector("#id_country");
+
+    if (!phoneInput) return;
+
+    // map your dropdown values -> ISO2 codes used by intl-tel-input
+    const COUNTRY_ISO_MAP = {
+      "India": "in",
+      "UAE (Dubai)": "ae",
+      "Oman": "om",
+      "Qatar": "qa",
+      "Saudi Arabia": "sa",
+      "Kuwait": "kw",
+      "Bahrain": "bh",
+      "Other": "us"   // fallback
+    };
+
+    const iti = window.intlTelInput(phoneInput, {
+      initialCountry: "ae",
+      separateDialCode: true,
+      preferredCountries: ["ae", "in", "om", "qa", "sa", "kw", "bh"],
+      utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/js/utils.js"
+    });
+
+    // ✅ when country dropdown changes, update phone input country automatically
+    if (countrySelect) {
+      const setByDropdown = () => {
+        const selectedText = countrySelect.options[countrySelect.selectedIndex].text;
+        const iso2 = COUNTRY_ISO_MAP[selectedText] || "ae";
+        iti.setCountry(iso2);
+      };
+
+      // on page load also
+      setByDropdown();
+
+      countrySelect.addEventListener("change", setByDropdown);
+    }
+
+    // ✅ save full international number in DB (ex: +968xxxxxxxx)
+    phoneInput.form.addEventListener("submit", function () {
+      phoneInput.value = iti.getNumber();
+    });
+  });
+</script>
+{% endblock %}

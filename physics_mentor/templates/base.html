@@ -4,7 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Physics Mentor</title>
+
+    <link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/css/intlTelInput.css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5">
+    
+
      {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -18,6 +23,7 @@
         <li><a href="{% url 'features' %}">Features</a></li>
         <li><a href="{% url 'testimonials' %}">Testimonials</a></li>
         <li><a href="{% url 'contact' %}">Contact</a></li>
+        <li><a href="{% url 'aboutus' %}">About Us</a></li>
     </ul>
 
     <div class="nav-actions">
@@ -35,7 +41,7 @@
    class="whatsapp-float"
    target="_blank"
    title="Join our WhatsApp Group">
-    <img src="{% static 'images/whatsapp_logo.jpg' %}" alt="WhatsApp">
+    <img src="{% static 'images/whatsapp_logo.jpg' %}" alt="WhatsApp"  >
 </a>
 
 
@@ -45,6 +51,14 @@
    title="Call Physics Mentor">
   <img src="{% static 'images/phncall_icon.png' %}" alt="Call">
 </a>
+
+
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/js/intlTelInput.min.js"></script>
+
+{% block extra_js %}{% endblock %}
+
+{% block extra2_js %}{% endblock %}
+{% block extra3_js %}{% endblock %}
 
 
 </body>
