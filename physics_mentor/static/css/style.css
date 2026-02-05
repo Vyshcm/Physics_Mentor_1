@@ -412,6 +412,97 @@ body {
 
 
 
+/* ===== Scroll Reveal Animation ===== */
+
+
+
+
+/* Optional: a slightly slower reveal for hero/title */
+.reveal.slow {
+  transition-duration: 1.2s;
+}
+
+/* ===== Course Card Premium Hover ===== */
+.course-card {
+  transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.course-card:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.55);
+  border-color: rgba(34, 211, 238, 0.25);
+}
+
+/* Glow line on hover */
+.course-card:hover::after {
+  background: radial-gradient(
+    circle at 20% 10%,
+    rgba(34, 211, 238, 0.22),
+    transparent 58%
+  );
+}
+
+/* Button hover effect */
+.course-cta .btn-primary {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+}
+
+.course-cta .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(34, 211, 238, 0.18);
+  filter: brightness(1.06);
+}
+
+/* List item hover (subtle highlight) */
+.course-points li {
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.course-points li:hover {
+  transform: translateX(4px);
+  color: rgba(255, 255, 255, 0.98);
+}
+
+
+
+
+
+
+
+/* ===== Global Scroll Reveal ===== */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+  will-change: opacity, transform;
+}
+
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+   transition-delay: var(--reveal-delay, 0s);
+}
+
+
+
+
+/* Slight stagger feel automatically */
+.scroll-reveal {
+  transition-delay: 0.05s;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+
+
+
 
 /* ================================
    WhatsApp Floating Button

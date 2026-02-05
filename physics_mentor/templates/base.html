@@ -32,7 +32,7 @@
     </div>
 </nav>
 
-<main class="page-container">
+<main class="page-container ">
     {% block content %}{% endblock %}
 </main>
 
@@ -117,6 +117,48 @@
     </div>
   </div>
 </footer>
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const elements = document.querySelectorAll(
+    "section, article:not(footer article), .course-card, .courses-header, .about-section, .content-block"
+  );
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    {
+      threshold: 0.15,
+      rootMargin: "0px 0px -10% 0px"
+    }
+  );
+
+  elements.forEach(el => {
+    el.classList.add("scroll-reveal");
+
+    // 🔑 KEY FIX: reveal items already in viewport
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight * 0.85) {
+      el.classList.add("visible");
+    } else {
+      observer.observe(el);
+    }
+  });
+
+});
+</script>
+
+
+
 
 {% block extra_js %}{% endblock %}
 
