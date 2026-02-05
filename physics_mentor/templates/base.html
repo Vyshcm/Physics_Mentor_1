@@ -7,7 +7,7 @@
 
     <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/css/intlTelInput.css">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=5">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=6">
     
 
      {% block extra_css %}{% endblock %}
@@ -55,11 +55,72 @@
 
 <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/js/intlTelInput.min.js"></script>
 
+
+
+<footer class="pm-footer">
+  <div class="pm-footer__container">
+
+    <div class="pm-footer__col pm-footer__brand">
+      <h2 class="pm-footer__logo">Physics <span>Mentor</span></h2>
+      <p class="pm-footer__text">
+        Empowering students to excel in physics through personalized online tutoring.
+        From concepts to competitive exams, we make physics simple and fascinating.
+      </p>
+
+      <ul class="pm-footer__contact">
+        <li>📧 hello@physicsmentor.com</li>
+        <li>📞 +91 98765 43210</li>
+        <li>📍 Mumbai, India</li>
+      </ul>
+    </div>
+
+    <div class="pm-footer__col">
+      <h4 class="pm-footer__title">Quick Links</h4>
+      <ul class="pm-footer__list">
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'courses' %}">Courses</a></li>
+        <li><a href="{% url 'aboutus' %}">About Us</a></li>
+        <li><a href="{% url 'testimonials' %}">Success Stories</a></li>
+        <li><a href="#">Blog</a></li>
+      </ul>
+    </div>
+
+    <div class="pm-footer__col">
+      <h4 class="pm-footer__title">Our Courses</h4>
+      <ul class="pm-footer__list">
+        <li>IIT-JEE Physics</li>
+        <li>NEET Physics</li>
+        <li>Class 11 Physics</li>
+        <li>Class 12 Physics</li>
+        <li>Olympiad Prep</li>
+      </ul>
+    </div>
+
+    <div class="pm-footer__col">
+      <h4 class="pm-footer__title">Resources</h4>
+      <ul class="pm-footer__list">
+        <li>Study Materials</li>
+        <li>Practice Tests</li>
+        <li>Video Lectures</li>
+        <li>Doubt Sessions</li>
+        <li>FAQ</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="pm-footer__bottom">
+    <p>© 2025 Physics Mentor. All rights reserved.</p>
+    <div class="pm-footer__bottomlinks">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+    </div>
+  </div>
+</footer>
+
 {% block extra_js %}{% endblock %}
 
 {% block extra2_js %}{% endblock %}
 {% block extra3_js %}{% endblock %}
-
-
 </body>
 </html>

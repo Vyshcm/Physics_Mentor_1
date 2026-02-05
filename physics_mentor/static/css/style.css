@@ -490,3 +490,88 @@ a.call-float:hover{
 }
 
 
+
+
+
+
+
+
+/* ===== Physics Mentor Footer ===== */
+.pm-footer{
+  background: linear-gradient(135deg, #050b1f, #07152f);
+  color: #cfd8ff;
+  padding: 60px 8% 20px;
+}
+
+.pm-footer__container{
+  display: grid;
+  grid-template-columns: 1.7fr 1fr 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.pm-footer__logo{
+  margin: 0 0 12px;
+  color: #fff;
+  font-size: 26px;
+}
+.pm-footer__logo span{ color:#3fa9f5; }
+
+.pm-footer__text{ margin: 0 0 14px; line-height: 1.6; }
+
+.pm-footer__title{
+  margin: 0 0 14px;
+  color: #fff;
+  font-size: 18px;
+}
+
+.pm-footer__list,
+.pm-footer__contact{
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.pm-footer__list li,
+.pm-footer__contact li{
+  margin: 0 0 10px;
+}
+
+.pm-footer a{
+  color: #cfd8ff;
+  text-decoration: none;
+}
+.pm-footer a:hover{ color:#3fa9f5; }
+
+.pm-footer__bottom{
+  margin-top: 35px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pm-footer__bottom p{ margin: 0; }
+
+.pm-footer__bottomlinks a{ margin-left: 14px; }
+
+/* Responsive */
+@media (max-width: 992px){
+  .pm-footer__container{
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 600px){
+  .pm-footer__container{
+    grid-template-columns: 1fr;
+  }
+  .pm-footer__bottom{
+    flex-direction: column;
+    text-align: center;
+  }
+  .pm-footer__bottomlinks a{ margin: 0 10px; }
+}
+
