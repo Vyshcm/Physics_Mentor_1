@@ -7,10 +7,16 @@
 
     <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/css/intlTelInput.css">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=6">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=8">
     
 
      {% block extra_css %}{% endblock %}
+  <script>
+  // Make sure first paint is hidden + ready for animation
+  document.documentElement.classList.add("js", "reveal-preload");
+</script>
+
+
 </head>
 <body>
 
@@ -69,8 +75,8 @@
 
       <ul class="pm-footer__contact">
         <li>📧 hello@physicsmentor.com</li>
-        <li>📞 +91 98765 43210</li>
-        <li>📍 Mumbai, India</li>
+        <li>📞 +91 7306737811</li>
+        <li>📍 kerala, India</li>
       </ul>
     </div>
 
@@ -88,11 +94,10 @@
     <div class="pm-footer__col">
       <h4 class="pm-footer__title">Our Courses</h4>
       <ul class="pm-footer__list">
-        <li>IIT-JEE Physics</li>
-        <li>NEET Physics</li>
+         <li>Class 10 Physics</li>
         <li>Class 11 Physics</li>
         <li>Class 12 Physics</li>
-        <li>Olympiad Prep</li>
+        <li>Crash Course</li>
       </ul>
     </div>
 
@@ -110,7 +115,7 @@
   </div>
 
   <div class="pm-footer__bottom">
-    <p>© 2025 Physics Mentor. All rights reserved.</p>
+    <p>© 2026 Physics Mentor. All rights reserved.</p>
     <div class="pm-footer__bottomlinks">
       <a href="#">Privacy Policy</a>
       <a href="#">Terms of Service</a>
@@ -122,43 +127,67 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+  const main = document.querySelector("main.page-container");
+  if (!main) return;
 
-  const elements = document.querySelectorAll(
-    "section, article:not(footer article), .course-card, .courses-header, .about-section, .content-block"
+  // Select blocks. If page is wrapped in one div, animate its children too.
+  let elements = Array.from(main.children).filter(el =>
+    !["SCRIPT","STYLE","NOSCRIPT"].includes(el.tagName)
   );
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("visible");
-          observer.unobserve(entry.target);
-        }
-      });
-    },
-    {
-      threshold: 0.15,
-      rootMargin: "0px 0px -10% 0px"
-    }
-  );
+  if (elements.length === 1) {
+    const inner = Array.from(elements[0].children).filter(el =>
+      !["SCRIPT","STYLE","NOSCRIPT"].includes(el.tagName)
+    );
+    if (inner.length) elements = inner;
+  }
 
+  if (!elements.length) return;
+
+  // Add scroll-reveal class BEFORE removing preload
   elements.forEach(el => {
     el.classList.add("scroll-reveal");
-
-    // 🔑 KEY FIX: reveal items already in viewport
-    const rect = el.getBoundingClientRect();
-    if (rect.top < window.innerHeight * 0.85) {
-      el.classList.add("visible");
-    } else {
-      observer.observe(el);
-    }
+    el.classList.remove("visible");
+    el.style.setProperty("--reveal-delay", "0s");
   });
 
+  // Now allow normal painting
+  document.documentElement.classList.remove("reveal-preload");
+
+  // Force reflow so transitions always trigger
+  void document.body.offsetHeight;
+
+  // Reveal above the fold slowly (page open animation)
+  const above = [];
+  const below = [];
+
+  elements.forEach(el => {
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight * 0.92) above.push(el);
+    else below.push(el);
+  });
+
+  setTimeout(() => {
+    above.forEach((el, i) => {
+      el.style.setProperty("--reveal-delay", `${i * 0.12}s`);
+      el.classList.add("visible");
+    });
+  }, 80);
+
+  // Scroll reveal remaining content
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.setProperty("--reveal-delay", "0s");
+        entry.target.classList.add("visible");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: "0px 0px -10% 0px" });
+
+  below.forEach(el => observer.observe(el));
 });
 </script>
-
-
-
 
 {% block extra_js %}{% endblock %}
 

@@ -1,6 +1,9 @@
 from django.contrib import admin
+from django.contrib.admin.models import LogEntry
 from .models import ContactQuery
 
+
+admin.site.register(LogEntry)
 @admin.register(ContactQuery)
 class ContactQueryAdmin(admin.ModelAdmin):
     list_display = (

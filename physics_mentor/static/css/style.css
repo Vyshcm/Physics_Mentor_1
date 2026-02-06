@@ -469,27 +469,6 @@ body {
 
 
 
-/* ===== Global Scroll Reveal ===== */
-.scroll-reveal {
-  opacity: 0;
-  transform: translateY(32px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
-  will-change: opacity, transform;
-}
-
-.scroll-reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-   transition-delay: var(--reveal-delay, 0s);
-}
-
-
-
-
-/* Slight stagger feel automatically */
-.scroll-reveal {
-  transition-delay: 0.05s;
-}
 
 /* Accessibility */
 @media (prefers-reduced-motion: reduce) {
@@ -667,3 +646,39 @@ a.call-float:hover{
   .pm-footer__bottomlinks a{ margin: 0 10px; }
 }
 
+
+
+
+
+
+
+
+/* ===== Preload: hide first view BEFORE paint ===== */
+html.js.reveal-preload main.page-container > * {
+  opacity: 0;
+  transform: translateY(32px);
+}
+
+/* ===== Normal reveal system ===== */
+html.js .scroll-reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+  will-change: opacity, transform;
+}
+
+html.js .scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: var(--reveal-delay, 0s);
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  html.js .scroll-reveal,
+  html.js.reveal-preload main.page-container > * {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
