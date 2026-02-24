@@ -1,0 +1,257 @@
+h2{
+    color: #000;
+}
+.contact-hero{
+  padding: 60px 0;
+  text-align: center;
+  background: #f5f7fb;
+}
+.contact-hero h2{
+  margin: 0;
+  font-size: 36px;
+  font-weight: 800;
+}
+
+.contact-wrap{
+  position: relative;
+  padding: 60px 0;
+
+  /* physics themed background image */
+  background-color: blue;
+  background-repeat: repeat;
+  background-size: 420px;
+  background-position: center;
+}
+
+/* soft white overlay for readability */
+.contact-wrap::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.9);
+  z-index: 0;
+}
+
+/* keep content above overlay */
+.contact-wrap > .container{
+  position: relative;
+  z-index: 1;
+}
+
+.container{
+  width: min(1100px, 92%);
+  margin: auto;
+}
+
+/* cards */
+.contact-cards{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 28px;
+}
+.c-card{
+  background: #0f1c2e;
+  color: #fff;
+  border-radius: 10px;
+  padding: 18px;
+  text-align: center;
+}
+.c-icon{ font-size: 26px; margin-bottom: 6px; }
+
+/* ✅ main box */
+.contact-box{
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  align-items: stretch;       /* ✅ both columns same height */
+
+  background: rgba(255,255,255,0.95);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+}
+
+
+
+.contact-img{
+  background: #f5f7fb;
+
+  overflow: hidden;              /* important */
+ 
+}
+.contact-img img{
+  width: 100%;
+  height: 100%;
+    display: block;
+  object-fit: cover;             /* ✅ removes gaps */
+  object-position: center top;
+  
+}
+
+.contact-form{
+  padding: 26px;
+}
+.contact-form h3{
+  margin: 0 0 14px;
+  font-weight: 800;
+}
+
+.f-row{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.f-row.two-col{
+  grid-template-columns: 1fr 1fr;
+}
+
+.f-group label{
+  font-size: 12px;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.f-group input,
+.f-group select,
+.f-group textarea{
+  width: 100%;
+  padding: 10px 10px;
+  border: 1px solid #d8d8d8;
+  border-radius: 8px;
+  outline: none;
+}
+
+.send-btn{
+  background: #0ea5e9;
+  color: #fff;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 800;
+  margin-top: 6px;
+}
+.small-note{
+  margin-top: 10px;
+  color: #666;
+  font-size: 13px;
+}
+
+/* responsive */
+@media (max-width: 900px){
+  .contact-cards{ grid-template-columns: 1fr; }
+  .contact-box{ grid-template-columns: 1fr; }
+  .f-row{ grid-template-columns: 1fr; }
+  .f-row.two-col{ grid-template-columns: 1fr; }
+}
+@media (max-width: 900px){
+  .contact-box{
+    grid-template-columns: 1fr;
+  }
+
+  .contact-img{
+    height: 240px;
+  }
+
+  .contact-img img{
+    object-position: center;
+  }
+}
+
+
+/* ✅ cards hover */
+.c-card {
+  transition: 0.3s ease;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.c-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 28px rgba(0,0,0,0.18);
+  border-color: rgba(14,165,233,0.7);
+}
+
+/* ✅ image hover */
+.contact-img img{
+  transition: 0.35s ease;
+}
+.contact-img:hover img{
+  transform: scale(1.03);
+}
+
+/* ✅ form fields one per line */
+.f-col{
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+/* ✅ inputs hover + focus (looks premium) */
+.contact-form input,
+.contact-form select,
+.contact-form textarea{
+  transition: 0.25s ease;
+  border: 1px solid #d7d7d7;
+  border-radius: 10px;
+  padding: 12px 12px;
+}
+
+.contact-form input:hover,
+.contact-form select:hover,
+.contact-form textarea:hover{
+  border-color: #0ea5e9;
+}
+
+.contact-form input:focus,
+.contact-form select:focus,
+.contact-form textarea:focus{
+  outline: none;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 4px rgba(14,165,233,0.18);
+}
+
+/* ✅ button hover */
+.send-btn{
+  transition: 0.25s ease;
+}
+.send-btn:hover{
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(14,165,233,0.25);
+}
+
+/* ✅ make form area look better */
+.contact-form h3{
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 18px;
+}
+
+
+
+
+
+
+
+
+
+
+/* Make intl-tel-input container full width */
+.iti {
+  width: 100% !important;
+}
+
+/* Make phone input same width as other inputs */
+.iti__tel-input {
+  width: 100% !important;
+  height: 48px;
+  font-size: 15px;
+  padding-left: 110px !important; /* space for flag + dial code */
+  box-sizing: border-box;
+}
+
+/* Align spacing with other form fields */
+.contact-form .iti {
+  margin-bottom: 14px;
+}

@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/contact.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- Contact Banner -->
+<section class="contact-hero">
+  <h2>Contact Us</h2>
+</section>
+
+<section class="contact-wrap">
+  <div class="container">
+
+    <!-- Info Cards -->
+    <div class="contact-cards">
+      <div class="c-card">
+        <div class="c-icon">📍</div>
+        <h4>Address</h4>
+        <p>
+          PhysicsMentor <br>
+          Online Learning Platform <br>
+          GCC Countries & India
+        </p>
+      </div>
+
+      <div class="c-card">
+        <div class="c-icon">📞</div>
+        <h4>Contact</h4>
+        <p>
+          
+          +91 7306737811
+        </p>
+      </div>
+
+      <div class="c-card">
+        <div class="c-icon">✉️</div>
+        <h4>Email</h4>
+        <p>support@physicsmentor.com</p>
+      </div>
+    </div>
+
+    <!-- Contact Box -->
+    <div class="contact-box">
+
+      <!-- Left Image -->
+      <div class="contact-img">
+        <img src="{% static 'images/contact_image.jpeg' %}" alt="Contact Image">
+      </div>
+
+      <!-- Right Form -->
+      <div class="contact-form">
+        <h3>Get In Touch</h3>
+
+        <form method="post">
+  {% csrf_token %}
+
+  <div class="f-col">
+    {{ form.full_name.label_tag }}
+    {{ form.full_name }}
+  </div>
+
+  <div class="f-col">
+    {{ form.email.label_tag }}
+    {{ form.email }}
+  </div>
+
+  <div class="f-col">
+    {{ form.country.label_tag }}
+    {{ form.country }}
+  </div>
+
+  <div class="f-col">
+    {{ form.phone.label_tag }}
+    {{ form.phone }}
+  </div>
+
+  <div class="f-col">
+    {{ form.student_class.label_tag }}
+    {{ form.student_class }}
+  </div>
+
+  <div class="f-col">
+    {{ form.subject.label_tag }}
+    {{ form.subject }}
+  </div>
+
+  <div class="f-col">
+    {{ form.place.label_tag }}
+    {{ form.place }}
+  </div>
+
+  <div class="f-col">
+    {{ form.tuition_type.label_tag }}
+    {{ form.tuition_type }}
+  </div>
+
+  <div class="f-col">
+    {{ form.message.label_tag }}
+    {{ form.message }}
+  </div>
+
+  <button type="submit" class="send-btn">SEND MESSAGE</button>
+
+  {% if success %}
+    <p class="small-note" style="color: green;">Message sent successfully!</p>
+  {% endif %}
+</form>
+
+
+        {% if success %}
+        <script>
+          alert("Thank you! Your query has been submitted successfully.");
+        </script>
+        {% endif %}
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const phoneInput = document.querySelector("#id_phone");
+    const countrySelect = document.querySelector("#id_country");
+
+    if (!phoneInput) return;
+
+    // map your dropdown values -> ISO2 codes used by intl-tel-input
+    const COUNTRY_ISO_MAP = {
+      "India": "in",
+      "UAE (Dubai)": "ae",
+      "Oman": "om",
+      "Qatar": "qa",
+      "Saudi Arabia": "sa",
+      "Kuwait": "kw",
+      "Bahrain": "bh",
+      "Other": "us"   // fallback
+    };
+
+    const iti = window.intlTelInput(phoneInput, {
+      initialCountry: "ae",
+      separateDialCode: true,
+      preferredCountries: ["ae", "in", "om", "qa", "sa", "kw", "bh"],
+      utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/js/utils.js"
+    });
+
+    // ✅ when country dropdown changes, update phone input country automatically
+    if (countrySelect) {
+      const setByDropdown = () => {
+        const selectedText = countrySelect.options[countrySelect.selectedIndex].text;
+        const iso2 = COUNTRY_ISO_MAP[selectedText] || "ae";
+        iti.setCountry(iso2);
+      };
+
+      // on page load also
+      setByDropdown();
+
+      countrySelect.addEventListener("change", setByDropdown);
+    }
+
+    // ✅ save full international number in DB (ex: +968xxxxxxxx)
+    phoneInput.form.addEventListener("submit", function () {
+      phoneInput.value = iti.getNumber();
+    });
+  });
+</script>
+{% endblock %}

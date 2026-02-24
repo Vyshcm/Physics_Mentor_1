@@ -1,0 +1,684 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0b1220;
+    color: white;
+    overflow-x: hidden;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 60px;
+    align-items: center;
+    background: #0b1220;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.logo span {
+    color: #20d4ff;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 25px;
+}
+
+.nav-links a {
+    color: #b0c4de;
+    text-decoration: none;
+}
+
+.nav-actions a {
+    margin-left: 20px;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: #20d4ff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    color: black;
+    font-weight: bold;
+}
+
+.btn-outline {
+    border: 1px solid #20d4ff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    color: #20d4ff;
+}
+
+.hero {
+    text-align: center;
+    padding: 120px 20px;
+}
+
+.hero span {
+    color: #20d4ff;
+}
+
+.features, .courses {
+    padding: 80px;
+    text-align: center;
+}
+
+.feature-grid, .course-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-top: 40px;
+}
+
+.card, .home-course-card {
+    background-color: #111a2f; 
+    padding: 30px;
+    border-radius: 12px;
+}
+
+
+.cta {
+    text-align: center;
+    padding: 80px;
+    background: linear-gradient(135deg, #0b1220, #111a2f);
+}
+
+.footer {
+    text-align: center;
+    padding: 20px;
+    background: #050914;
+}
+.page-container {
+  padding: 90px 8%;
+}
+
+
+
+/* ===== Feature Carousel (CSS Only) ===== */
+
+.feature-carousel {
+  max-width: 1200px;
+  margin: 70px auto 40px;
+  padding: 0 20px;
+}
+
+/* Horizontal carousel track */
+.feature-track {
+  display: flex;
+  gap: 22px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 14px;
+}
+
+/* Hide scroll bar */
+.feature-track::-webkit-scrollbar {
+  display: none;
+}
+.feature-track {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Each slide */
+.feature-slide {
+  position: relative;
+  min-width: 100%;
+  scroll-snap-align: center;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Equal-size images */
+.feature-slide img {
+  width: 100%;
+  height: 520px;         /* ✅ Forces same height for all */
+  object-fit: cover;     /* ✅ Crop nicely */
+  display: block;
+  filter: brightness(0.75);
+}
+
+/* Overlay */
+.feature-overlay {
+  position: absolute;
+  left: 40px;
+  bottom: 36px;
+  max-width: 560px;
+}
+
+.feature-overlay h2 {
+  font-size: 44px;
+  font-weight: 900;
+  color: #22d3ee;
+  margin: 0 0 10px 0;
+}
+
+.feature-overlay p {
+  font-size: 18px;
+  color: #d1d5db;
+  margin: 0;
+}
+
+/* Hint text under carousel */
+.feature-hint {
+  text-align: center;
+  margin-top: 14px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .feature-slide img {
+    height: 380px;
+  }
+
+  .feature-overlay {
+    left: 18px;
+    bottom: 18px;
+    max-width: 90%;
+  }
+
+  .feature-overlay h2 {
+    font-size: 28px;
+  }
+
+  .feature-overlay p {
+    font-size: 15px;
+  }
+}
+
+
+
+
+/* ===== Courses Page v2 (Premium + Background Images) ===== */
+
+.courses-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 60px 0;
+}
+
+.courses-header {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto 50px auto;
+}
+
+.section-label {
+  color: #22d3ee;
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.courses-title {
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1.05;
+  margin: 0 0 16px 0;
+}
+
+.courses-title span {
+  color: #22d3ee;
+}
+
+.courses-subtitle {
+  color: #9ca3af;
+  line-height: 1.7;
+  margin: 0;
+  font-size: 16px;
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+
+@media (max-width: 900px) {
+  .courses-grid {
+    grid-template-columns: 1fr;
+  }
+  .courses-title {
+    font-size: 40px;
+  }
+}
+
+/* ===== CARD (with image background) ===== */
+.course-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  padding: 40px;
+  min-height: 620px;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+
+  /* fallback bg if image missing */
+  background: rgba(255, 255, 255, 0.04);
+
+  color: #ffffff;
+}
+
+/* DARK OVERLAY for readability */
+.course-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(2, 6, 23, 0.93),
+    rgba(2, 6, 23, 0.55)
+  );
+  z-index: 0;
+}
+
+/* subtle glow */
+.course-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 20% 10%,
+    rgba(34, 211, 238, 0.12),
+    transparent 55%
+  );
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ensure content above overlays */
+.course-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ✅ YOUR uploaded images */
+.class11-bg {
+  background: url("../images/phy_mentor_img1.png") center / cover no-repeat;
+}
+
+.class12-bg {
+  background: url("../images/phy_mentor_img2.png") center / cover no-repeat;
+}
+
+/* hover effect */
+.course-card:hover {
+  transform: translateY(-3px);
+  transition: 0.25s ease;
+  border-color: rgba(34, 211, 238, 0.18);
+}
+
+/* ===== TAGS ===== */
+.course-top {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 14px;
+}
+
+.tag {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  backdrop-filter: blur(8px);
+}
+
+.tag-blue {
+  background: rgba(34, 211, 238, 0.16);
+  color: #22d3ee;
+  border: 1px solid rgba(34, 211, 238, 0.35);
+}
+
+.tag-yellow {
+  background: rgba(251, 191, 36, 0.16);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.35);
+}
+
+/* ===== TEXT ===== */
+.course-name {
+  font-size: 34px;
+  margin: 0 0 10px 0;
+  font-weight: 800;
+}
+
+.course-desc {
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0 0 18px 0;
+  line-height: 1.6;
+   font-size: 17px;
+}
+
+/* ===== BULLETS ===== */
+.course-points {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 18px 0;
+}
+
+.course-points li {
+  position: relative;
+  padding-left: 18px;
+  margin: 10px 0;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.4;
+}
+
+.course-points li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #22d3ee;
+  font-weight: 900;
+}
+
+/* ===== META PILLS ===== */
+.course-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 18px 0;
+}
+
+.course-meta span {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: rgba(255, 255, 255, 0.85);
+
+  backdrop-filter: blur(8px);
+  white-space: nowrap;
+}
+
+.course-cta {
+  margin-top: 8px;
+}
+
+
+
+/* ===== Scroll Reveal Animation ===== */
+
+
+
+
+/* Optional: a slightly slower reveal for hero/title */
+.reveal.slow {
+  transition-duration: 1.2s;
+}
+
+/* ===== Course Card Premium Hover ===== */
+.course-card {
+  transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+}
+
+.course-card:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.55);
+  border-color: rgba(34, 211, 238, 0.25);
+}
+
+/* Glow line on hover */
+.course-card:hover::after {
+  background: radial-gradient(
+    circle at 20% 10%,
+    rgba(34, 211, 238, 0.22),
+    transparent 58%
+  );
+}
+
+/* Button hover effect */
+.course-cta .btn-primary {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+}
+
+.course-cta .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(34, 211, 238, 0.18);
+  filter: brightness(1.06);
+}
+
+/* List item hover (subtle highlight) */
+.course-points li {
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.course-points li:hover {
+  transform: translateX(4px);
+  color: rgba(255, 255, 255, 0.98);
+}
+
+
+
+
+
+
+
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+
+
+
+
+/* ================================
+   WhatsApp Floating Button
+   (Always visible while scrolling)
+=================================== */
+
+a.whatsapp-float{
+  position: fixed !important;
+  left: 14px !important;
+  bottom: 14px !important;
+
+  width: 70px !important;     /* reduced size */
+  height: 70px !important;
+
+  background: #25D366 !important;
+  border-radius: 50% !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  z-index: 2147483647 !important;   /* above everything */
+  box-shadow: 0 10px 24px rgba(0,0,0,0.30) !important;
+
+  text-decoration: none !important;
+  transition: 0.25s ease !important;
+}
+
+a.whatsapp-float img{
+  width: 24px !important;
+  height: 24px !important;
+  display: block !important;
+}
+
+a.whatsapp-float:hover{
+  transform: scale(1.08) !important;
+  box-shadow: 0 14px 30px rgba(0,0,0,0.35) !important;
+}
+
+
+
+/* ================================
+   Call Floating Button (Right Side)
+=================================== */
+
+a.call-float{
+  position: fixed !important;
+  right: 14px !important;
+  bottom: 14px !important;
+
+  width: 70px !important;
+  height: 70px !important;
+
+  background: #0EA5E9 !important;  /* blue call button */
+  border-radius: 50% !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  z-index: 2147483647 !important;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.30) !important;
+
+  text-decoration: none !important;
+  transition: 0.25s ease !important;
+}
+
+a.call-float img{
+  width: 22px !important;
+  height: 22px !important;
+  display: block !important;
+}
+
+a.call-float:hover{
+  transform: scale(1.08) !important;
+  box-shadow: 0 14px 30px rgba(0,0,0,0.35) !important;
+}
+
+
+
+
+
+
+
+
+/* ===== Physics Mentor Footer ===== */
+.pm-footer{
+  background: linear-gradient(135deg, #050b1f, #07152f);
+  color: #cfd8ff;
+  padding: 60px 8% 20px;
+}
+
+.pm-footer__container{
+  display: grid;
+  grid-template-columns: 1.7fr 1fr 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.pm-footer__logo{
+  margin: 0 0 12px;
+  color: #fff;
+  font-size: 26px;
+}
+.pm-footer__logo span{ color:#3fa9f5; }
+
+.pm-footer__text{ margin: 0 0 14px; line-height: 1.6; }
+
+.pm-footer__title{
+  margin: 0 0 14px;
+  color: #fff;
+  font-size: 18px;
+}
+
+.pm-footer__list,
+.pm-footer__contact{
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.pm-footer__list li,
+.pm-footer__contact li{
+  margin: 0 0 10px;
+}
+
+.pm-footer a{
+  color: #cfd8ff;
+  text-decoration: none;
+}
+.pm-footer a:hover{ color:#3fa9f5; }
+
+.pm-footer__bottom{
+  margin-top: 35px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.pm-footer__bottom p{ margin: 0; }
+
+.pm-footer__bottomlinks a{ margin-left: 14px; }
+
+/* Responsive */
+@media (max-width: 992px){
+  .pm-footer__container{
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 600px){
+  .pm-footer__container{
+    grid-template-columns: 1fr;
+  }
+  .pm-footer__bottom{
+    flex-direction: column;
+    text-align: center;
+  }
+  .pm-footer__bottomlinks a{ margin: 0 10px; }
+}
+
+
+
+
+
+
+
+
+/* ===== Preload: hide first view BEFORE paint ===== */
+html.js.reveal-preload main.page-container > * {
+  opacity: 0;
+  transform: translateY(32px);
+}
+
+/* ===== Normal reveal system ===== */
+html.js .scroll-reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+  will-change: opacity, transform;
+}
+
+html.js .scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: var(--reveal-delay, 0s);
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  html.js .scroll-reveal,
+  html.js.reveal-preload main.page-container > * {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}

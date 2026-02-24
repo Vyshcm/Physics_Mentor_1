@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<!-- ===== Feature Carousel (CSS-only) ===== -->
+<section class="feature-carousel">
+  <div class="feature-track">
+
+    <!-- Slide 1 -->
+    <article class="feature-slide">
+      <img src="{% static 'images/phy_mentor_img3.jpg' %}" alt="Interactive Live Classes">
+      <div class="feature-overlay">
+        <h2>Interactive Live Classes</h2>
+        <p>Engage with expert faculty in real-time sessions</p>
+      </div>
+    </article>
+
+    <!-- Slide 2 -->
+    <article class="feature-slide">
+      <img src="{% static 'images/phy_mentor_img4.jpg' %}" alt="Parent Tracking">
+      <div class="feature-overlay">
+        <h2>Track Progress, Stay Informed</h2>
+        <p>Parents gain insights into student’s academic journey</p>
+      </div>
+    </article>
+
+    <!-- Slide 3 -->
+    <article class="feature-slide">
+      <img src="{% static 'images/phy_mentor_img5.jpg' %}" alt="Quizzes & Exams">
+      <div class="feature-overlay">
+        <h2>Quizzes, Exams & Beyond</h2>
+        <p>Daily quizzes, unit tests, and practice tests</p>
+      </div>
+    </article>
+
+  </div>
+
+  <p class="feature-hint">Swipe / scroll to view →</p>
+</section>
+
+
+<!-- ===== Your existing sections below ===== -->
+<section class="hero">
+    <p class="trusted">⭐ Trusted by students worldwide</p>
+
+    <h1>
+        Master Physics with<br>
+        <span>Expert Guidance</span>
+    </h1>
+
+    <p class="subtitle">
+        CBSE Class 11 & 12 Physics | Live Online | Parent Tracking
+    </p>
+
+    <div class="hero-buttons">
+        <a class="btn-primary">Start Free Demo</a>
+        <a class="btn-outline">Watch Demo</a>
+    </div>
+</section>
+
+<section class="features">
+    <h2>Everything You Need to Excel</h2>
+
+    <div class="feature-grid">
+        <div class="card">Live Classes</div>
+        <div class="card">Doubt Solving</div>
+        <div class="card">Practice Problems</div>
+        <div class="card">Progress Tracking</div>
+    </div>
+</section>
+
+<section class="courses">
+    <h2>Our Courses</h2>
+
+    <div class="course-grid">
+        <div class="home-course-card">
+            <h3>Class 11 Physics</h3>
+            <p>Concept clarity + numericals</p>
+        </div>
+        <div class="home-course-card">
+            <h3>Class 12 Physics</h3>
+            <p>Board exam focused</p>
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <h2>Ready to Unlock the Secrets of Physics?</h2>
+    <a class="btn-primary">Start Free Trial</a>
+</section>
+
+<footer class="footer">
+    <p>© 2026 Physics Mentor</p>
+</footer>
+
+{% endblock %}

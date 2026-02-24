@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        max-width: 600px;
+        margin: 40px auto;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        height: 60vh;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        font-family: Arial, sans-serif;
+    }
+
+    .chat-header {
+        background: #f4f4f4;
+        padding: 15px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+        border-radius: 8px 8px 0 0;
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: #333;
+    }
+
+    .chat-messages {
+        flex-grow: 1;
+        padding: 15px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .message {
+        max-width: 75%;
+        padding: 10px 14px;
+        border-radius: 18px;
+        line-height: 1.4;
+        word-wrap: break-word;
+    }
+
+    .user-message {
+        align-self: flex-end;
+        background-color: #007bff;
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .ai-message {
+        align-self: flex-start;
+        background-color: #f1f0f0;
+        color: #333;
+        border-bottom-left-radius: 4px;
+    }
+
+    .thinking-message {
+        align-self: flex-start;
+        background-color: #f1f0f0;
+        color: #888;
+        font-style: italic;
+        border-bottom-left-radius: 4px;
+    }
+
+    .chat-input-area {
+        display: flex;
+        padding: 10px;
+        border-top: 1px solid #ddd;
+        background: #fafafa;
+        border-radius: 0 0 8px 8px;
+    }
+
+    .chat-input {
+        flex-grow: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        outline: none;
+        font-size: 1rem;
+    }
+
+    .chat-input:focus {
+        border-color: #007bff;
+    }
+
+    .send-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        margin-left: 10px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.2s;
+    }
+
+    .send-btn:hover {
+        background: #0056b3;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <div class="chat-header">AI Doubt Solver</div>
+    <div class="chat-messages" id="chat-messages">
+        <div class="message ai-message">Hello! Ask me any physics question.</div>
+    </div>
+    <div class="chat-input-area">
+        {% csrf_token %}
+        <input type="text" id="chat-input" class="chat-input" placeholder="Type your doubt here..." autocomplete="off">
+        <button id="send-btn" class="send-btn">Send</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const chatMessages = document.getElementById("chat-messages");
+        const chatInput = document.getElementById("chat-input");
+        const sendBtn = document.getElementById("send-btn");
+        const csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+
+        // Setup initial focus
+        chatInput.focus();
+
+        function addMessage(text, type, isMarkdown = false) {
+            const msgDiv = document.createElement("div");
+            msgDiv.classList.add("message", type);
+
+            if (isMarkdown) {
+                // Render text as markdown and sanitize to prevent XSS
+                msgDiv.innerHTML = DOMPurify.sanitize(marked.parse(text));
+            } else {
+                // Render safely as plain text
+                msgDiv.textContent = text;
+            }
+
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return msgDiv;
+        }
+
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            // Add user message (plain text)
+            addMessage(text, "user-message", false);
+            chatInput.value = "";
+
+            // Add "Thinking..." message (plain text)
+            const thinkingMsg = addMessage("Thinking...", "thinking-message", false);
+
+            try {
+                let csrfToken = "";
+                if (csrfTokenInput) {
+                    csrfToken = csrfTokenInput.value;
+                }
+
+                const response = await fetch('/ai-chat/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ message: text })
+                });
+
+                // Remove Thinking
+                if (chatMessages.contains(thinkingMsg)) {
+                    chatMessages.removeChild(thinkingMsg);
+                }
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.reply) {
+                        // Render AI reply safely using Markdown
+                        addMessage(data.reply, "ai-message", true);
+                    } else if (data.error) {
+                        addMessage("Error: " + data.error, "ai-message", false);
+                    }
+                } else {
+                    try {
+                        const data = await response.json();
+                        addMessage("API Error: " + (data.error || "Unknown error"), "ai-message", false);
+                    } catch (e) {
+                        addMessage("Sorry, there was an error communicating with the server.", "ai-message", false);
+                    }
+                }
+            } catch (error) {
+                // Remove Thinking
+                if (chatMessages.contains(thinkingMsg)) {
+                    chatMessages.removeChild(thinkingMsg);
+                }
+                addMessage("Network error while trying to connect.", "ai-message", false);
+            }
+        }
+
+        sendBtn.addEventListener("click", sendMessage);
+        chatInput.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+                sendMessage();
+            }
+        });
+    });
+</script>
+{% endblock %}

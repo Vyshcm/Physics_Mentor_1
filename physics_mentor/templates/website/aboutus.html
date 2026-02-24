@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/about.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="about-hero">
+  <div class="hero-bg">
+    <span class="blob blob-1"></span>
+    <span class="blob blob-2"></span>
+    <span class="blob blob-3"></span>
+  </div>
+
+  <div class="container hero-grid">
+    <!-- LEFT -->
+    <div class="hero-left reveal">
+      <div class="badge">Founder • Physics Mentor </div>
+
+      <h1><span>Vyshnavy C Muraly</span></h1>
+
+      <p class="sub">
+        I built this platform as part of my <b>final-year MCA main project</b> to make Physics
+        simpler and more engaging for students in <b>India</b> and the <b>UAE</b>.
+        With a strong Physics background and online teaching experience, my aim is to help students
+        learn with clarity and confidence—not memorization.
+      </p>
+
+      <div class="hero-actions">
+        <a href="{% url 'contact' %}" class="btn-primary">Contact Me</a>
+        <a href="#journey" class="btn-outline">My Journey</a>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats reveal">
+        <div class="stat-card">
+          <div class="stat-num" data-count="3">0</div>
+          <div class="stat-label">Years Experience</div>
+        </div>
+       
+        <div class="stat-card">
+          <div class="stat-num" data-count="2">0</div>
+          <div class="stat-label">India & UAE</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="hero-right reveal">
+      <div class="profile-card">
+        <!-- ✅ Replace with your own photo -->
+        <img src="{% static 'images/vyshnavy4.png' %}" alt="Vyshnavy C Muraly">
+        <div class="profile-info">
+          <h3>Vyshnavy C Muraly</h3>
+          <p>MCA (Current) • TKM College of Engineering</p>
+          <p class="muted">M.Sc Physics • B.Sc Physics (Govt College, Kottayam)</p>
+        </div>
+      </div>
+
+      <div class="floating-cards">
+        <div class="mini-card">
+          <h4>Teaching Style</h4>
+          <p>Concept-first + problem solving</p>
+        </div>
+        <div class="mini-card">
+          <h4>Experience</h4>
+          <p>Online Tutor • Team Interval</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- WHY THIS PLATFORM -->
+<section class="about-section">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="pill">Why this platform?</span>
+      <h2>Physics should feel <span class="accent">logical</span> and <span class="accent2">simple</span>.</h2>
+      <p>
+        This platform combines my Physics knowledge and MCA development skills to create a
+        modern learning space where students can learn at their own pace, practice smartly,
+        and gain confidence.
+      </p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature reveal">
+        <div class="icon">⚡</div>
+        <h3>Concept Clarity</h3>
+        <p>Step-by-step explanation to build strong fundamentals.</p>
+      </div>
+
+      <div class="feature reveal">
+        <div class="icon">🎯</div>
+        <h3>Exam Focus</h3>
+        <p>Important questions, numericals, and revision strategy.</p>
+      </div>
+
+      <div class="feature reveal">
+        <div class="icon">💬</div>
+        <h3>Doubt Support</h3>
+        <p>Friendly mentoring and consistent doubt clearing.</p>
+      </div>
+
+      <div class="feature reveal">
+        <div class="icon">🌍</div>
+        <h3>India + UAE</h3>
+        <p>Designed for students studying in India and GCC.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- JOURNEY / TIMELINE -->
+<section class="about-section alt" id="journey">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="pill">My Journey</span>
+      <h2>Education & Experience</h2>
+      <p>A quick timeline of how I reached here—from Physics to building a learning platform.</p>
+    </div>
+
+    <div class="timeline">
+      <div class="t-item reveal">
+        <div class="dot"></div>
+        <div class="t-card">
+          <h3>B.Sc Physics</h3>
+          <p class="muted">Government College, Kottayam</p>
+          <p>Built a strong base in fundamental Physics concepts.</p>
+        </div>
+      </div>
+
+      <div class="t-item reveal">
+        <div class="dot"></div>
+        <div class="t-card">
+          <h3>M.Sc Physics</h3>
+          <p class="muted">Government College, Kottayam</p>
+          <p>Strengthened analytical thinking and deeper understanding.</p>
+        </div>
+      </div>
+
+      <div class="t-item reveal">
+        <div class="dot"></div>
+        <div class="t-card">
+          <h3>Online Tutor</h3>
+          <p class="muted">Team Interval • 3+ Years</p>
+          <p>Taught students online and developed a student-friendly teaching method.</p>
+        </div>
+      </div>
+
+      <div class="t-item reveal">
+        <div class="dot"></div>
+        <div class="t-card">
+          <h3>MCA (Current)</h3>
+          <p class="muted">TKM College of Engineering</p>
+          <p>Developing this platform as my final-year MCA main project.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="about-cta">
+  <div class="container cta-box reveal">
+    <div>
+      <h2>Want to learn Physics with confidence?</h2>
+      <p>Send your query and I’ll help you choose the best tuition plan.</p>
+    </div>
+    <a class="btn-primary" href="{% url 'contact' %}">Get in Touch</a>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra3_js %}
+<script src="{% static 'js/about.js' %}"></script>
+{% endblock %}

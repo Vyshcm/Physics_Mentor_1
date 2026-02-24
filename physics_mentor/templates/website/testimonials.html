@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/testimonials.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="t-hero">
+  <div class="t-hero-inner">
+    <div class="t-pill">Trusted by students across GCC & India</div>
+
+    <h1 class="t-title">
+      Real Stories from <span>Real Learners</span>
+    </h1>
+
+    <p class="t-sub">
+      Discover how PhysicsMentor has helped students gain confidence, improve grades, and crack exams with structured learning.
+    </p>
+
+    <div class="t-hero-actions">
+      <a href="{% url 'courses' %}" class="t-btn t-btn-primary">Explore Courses</a>
+      <a href="{% url 'contact' %}" class="t-btn t-btn-outline">Get a Free Demo</a>
+    </div>
+  </div>
+
+  <div class="t-wave"></div>
+</section>
+
+<!-- STATS -->
+<section class="t-stats">
+  <div class="t-container">
+    <div class="t-stats-grid">
+      <div class="t-stat-card">
+        <div class="t-stat-icon">👩‍🎓</div>
+        <div class="t-stat-num">15+</div>
+        <div class="t-stat-label">Student Testimonials</div>
+      </div>
+
+      <div class="t-stat-card">
+        <div class="t-stat-icon">📚</div>
+        <div class="t-stat-num">1:1</div>
+        <div class="t-stat-label">Personal Mentoring</div>
+      </div>
+
+      <div class="t-stat-card">
+        <div class="t-stat-icon">⭐</div>
+        <div class="t-stat-num">4.9/5</div>
+        <div class="t-stat-label">Average Rating</div>
+      </div>
+
+      <div class="t-stat-card">
+        <div class="t-stat-icon">🌍</div>
+        <div class="t-stat-num">GCC</div>
+        <div class="t-stat-label">Dubai • Oman • Qatar • KSA</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION TITLE -->
+<section class="t-section-head">
+  <div class="t-container">
+    <div class="t-chip">Student Reviews</div>
+    <h2 class="t-h2">What Our Students Say</h2>
+    <p class="t-p">
+      A few words from students and parents who learned with us.
+    </p>
+  </div>
+</section>
+
+<!-- AUTO-MOVING CAROUSEL -->
+<section class="t-carousel">
+  <div class="t-container">
+
+    <div class="t-carousel-track" id="tTrack">
+      <!-- Card 1 -->
+      <article class="t-card">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-quote">
+          “I was weak in Physics, but the explanations were super clear. My confidence improved a lot in 3 weeks.”
+        </p>
+
+        <div class="t-tag">Class 11 • Dubai</div>
+
+        <div class="t-user">
+          <img src="{% static 'images/testimonials/student1.jpg' %}" alt="Student photo">
+          <div>
+            <div class="t-name">Aaliya M.</div>
+            <div class="t-role">Student</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 2 -->
+      <article class="t-card">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-quote">
+          “The notes + practice questions were perfect. I improved my marks and finally understood derivations.”
+        </p>
+
+        <div class="t-tag">Class 12 • Oman</div>
+
+        <div class="t-user">
+          <img src="{% static 'images/testimonials/student2.jpg' %}" alt="Student photo">
+          <div>
+            <div class="t-name">Arjun S.</div>
+            <div class="t-role">Student</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 3 -->
+      <article class="t-card">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-quote">
+          “As a parent I loved the structured plan. Regular updates and clear guidance helped my child stay consistent.”
+        </p>
+
+        <div class="t-tag">Parent • Qatar</div>
+
+        <div class="t-user">
+          <img src="{% static 'images/testimonials/parent1.jpg' %}" alt="Parent photo">
+          <div>
+            <div class="t-name">Mrs. Fatima</div>
+            <div class="t-role">Parent</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 4 -->
+      <article class="t-card">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-quote">
+          “Doubt clearing was quick. The teacher explains in a simple way and makes hard topics feel easy.”
+        </p>
+
+        <div class="t-tag">Class 10 • KSA</div>
+
+        <div class="t-user">
+          <img src="{% static 'images/testimonials/student3.jpg' %}" alt="Student photo">
+          <div>
+            <div class="t-name">Hassan R.</div>
+            <div class="t-role">Student</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Duplicate set for smooth infinite scroll (same cards again) -->
+      <article class="t-card t-dup">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-quote">
+          “I was weak in Physics, but the explanations were super clear. My confidence improved a lot in 3 weeks.”
+        </p>
+        <div class="t-tag">Class 11 • Dubai</div>
+        <div class="t-user">
+          <img src="{% static 'images/student1.jpg' %}" alt="Student photo">
+          <div>
+            <div class="t-name">Aaliya M.</div>
+            <div class="t-role">Student</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="t-card t-dup">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-quote">
+          “The notes + practice questions were perfect. I improved my marks and finally understood derivations.”
+        </p>
+        <div class="t-tag">Class 12 • Oman</div>
+        <div class="t-user">
+          <img src="{% static 'images/student2.jpg' %}" alt="Student photo">
+          <div>
+            <div class="t-name">Arjun S.</div>
+            <div class="t-role">Student</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="t-card t-dup">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-quote">
+          “As a parent I loved the structured plan. Regular updates and clear guidance helped my child stay consistent.”
+        </p>
+        <div class="t-tag">Parent • Qatar</div>
+        <div class="t-user">
+          <img src="{% static 'images/student3.jpg' %}" alt="Parent photo">
+          <div>
+            <div class="t-name">Mrs. Fatima</div>
+            <div class="t-role">Parent</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="t-card t-dup">
+        <div class="t-stars">★★★★★</div>
+        <p class="t-quote">
+          “Doubt clearing was quick. The teacher explains in a simple way and makes hard topics feel easy.”
+        </p>
+        <div class="t-tag">Class 10 • KSA</div>
+        <div class="t-user">
+          <img src="{% static 'images/student4.jpg' %}" alt="Student photo">
+          <div>
+            <div class="t-name">Hassan R.</div>
+            <div class="t-role">Student</div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+    <p class="t-hint">Tip: Hover on cards to pause movement.</p>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="t-cta">
+  <div class="t-container">
+    <h2 class="t-cta-title">Ready to Start Your Journey?</h2>
+    <p class="t-cta-sub">Book a free demo class and get a personalized learning plan.</p>
+    <a href="{% url 'contact' %}" class="t-btn t-btn-primary t-cta-btn">Get Started</a>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra2_js %}
+<script>
+  // Auto-scroll track (pauses on hover)
+  const track = document.getElementById("tTrack");
+  let speed = 0.6; // increase for faster
+  let rafId;
+
+  function tick() {
+    track.scrollLeft += speed;
+
+    // When it reaches half (because we duplicated cards), jump back smoothly
+    if (track.scrollLeft >= (track.scrollWidth / 2)) {
+      track.scrollLeft = 0;
+    }
+    rafId = requestAnimationFrame(tick);
+  }
+
+  // start
+  rafId = requestAnimationFrame(tick);
+
+  // pause/resume on hover
+  track.addEventListener("mouseenter", () => cancelAnimationFrame(rafId));
+  track.addEventListener("mouseleave", () => rafId = requestAnimationFrame(tick));
+</script>
+{% endblock %}

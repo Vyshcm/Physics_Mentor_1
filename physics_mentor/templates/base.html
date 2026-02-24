@@ -1,0 +1,201 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Physics Mentor</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/css/intlTelInput.css">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=8">
+
+
+  {% block extra_css %}{% endblock %}
+  <script>
+    // Make sure first paint is hidden + ready for animation
+    document.documentElement.classList.add("js", "reveal-preload");
+  </script>
+
+
+</head>
+
+<body>
+
+  <nav class="navbar">
+    <div class="logo">Physics<span>Mentor</span></div>
+
+    {% if not request.user.is_authenticated %}
+    <ul class="nav-links">
+      <li><a href="{% url 'home' %}">Home</a></li>
+      <li><a href="{% url 'courses' %}">Courses</a></li>
+      <li><a href="{% url 'features' %}">Features</a></li>
+      <li><a href="{% url 'testimonials' %}">Testimonials</a></li>
+      <li><a href="{% url 'contact' %}">Contact</a></li>
+      <li><a href="{% url 'aboutus' %}">About Us</a></li>
+    </ul>
+    {% endif %}
+
+    <div class="nav-actions" {% if request.user.is_authenticated %}style="margin-left: auto;" {% endif %}>
+      {% if request.user.is_authenticated %}
+      <a href="{% url 'logout' %}" class="btn-primary" style="background-color: #ef4444;">Log Out</a>
+      {% else %}
+      <a href="{% url 'login' %}" class="login">Log In</a>
+      <a href="{% url 'signup' %}" class="btn-primary">Get Started</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <main class="page-container ">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ✅ WHATSAPP FLOATING BUTTON (ADD HERE) -->
+  <a href="https://chat.whatsapp.com/DstRxHVvlGx6XFKBLnIYZO?mode=gi_t" class="whatsapp-float" target="_blank"
+    title="Join our WhatsApp Group">
+    <img src="{% static 'images/whatsapp_logo.jpg' %}" alt="WhatsApp">
+  </a>
+
+
+  <!-- 📞 Call Floating Button -->
+  <a href="tel:+917306737811" class="call-float" title="Call Physics Mentor">
+    <img src="{% static 'images/phncall_icon.png' %}" alt="Call">
+  </a>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/js/intlTelInput.min.js"></script>
+
+
+
+  <footer class="pm-footer">
+    <div class="pm-footer__container">
+
+      <div class="pm-footer__col pm-footer__brand">
+        <h2 class="pm-footer__logo">Physics <span>Mentor</span></h2>
+        <p class="pm-footer__text">
+          Empowering students to excel in physics through personalized online tutoring.
+          From concepts to competitive exams, we make physics simple and fascinating.
+        </p>
+
+        <ul class="pm-footer__contact">
+          <li>📧 hello@physicsmentor.com</li>
+          <li>📞 +91 7306737811</li>
+          <li>📍 kerala, India</li>
+        </ul>
+      </div>
+
+      <div class="pm-footer__col">
+        <h4 class="pm-footer__title">Quick Links</h4>
+        <ul class="pm-footer__list">
+          <li><a href="{% url 'home' %}">Home</a></li>
+          <li><a href="{% url 'courses' %}">Courses</a></li>
+          <li><a href="{% url 'aboutus' %}">About Us</a></li>
+          <li><a href="{% url 'testimonials' %}">Success Stories</a></li>
+          <li><a href="#">Blog</a></li>
+        </ul>
+      </div>
+
+      <div class="pm-footer__col">
+        <h4 class="pm-footer__title">Our Courses</h4>
+        <ul class="pm-footer__list">
+          <li>Class 10 Physics</li>
+          <li>Class 11 Physics</li>
+          <li>Class 12 Physics</li>
+          <li>Crash Course</li>
+        </ul>
+      </div>
+
+      <div class="pm-footer__col">
+        <h4 class="pm-footer__title">Resources</h4>
+        <ul class="pm-footer__list">
+          <li>Study Materials</li>
+          <li>Practice Tests</li>
+          <li>Video Lectures</li>
+          <li>Doubt Sessions</li>
+          <li>FAQ</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="pm-footer__bottom">
+      <p>© 2026 Physics Mentor. All rights reserved.</p>
+      <div class="pm-footer__bottomlinks">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+      </div>
+    </div>
+  </footer>
+
+
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const main = document.querySelector("main.page-container");
+      if (!main) return;
+
+      // Select blocks. If page is wrapped in one div, animate its children too.
+      let elements = Array.from(main.children).filter(el =>
+        !["SCRIPT", "STYLE", "NOSCRIPT"].includes(el.tagName)
+      );
+
+      if (elements.length === 1) {
+        const inner = Array.from(elements[0].children).filter(el =>
+          !["SCRIPT", "STYLE", "NOSCRIPT"].includes(el.tagName)
+        );
+        if (inner.length) elements = inner;
+      }
+
+      if (!elements.length) return;
+
+      // Add scroll-reveal class BEFORE removing preload
+      elements.forEach(el => {
+        el.classList.add("scroll-reveal");
+        el.classList.remove("visible");
+        el.style.setProperty("--reveal-delay", "0s");
+      });
+
+      // Now allow normal painting
+      document.documentElement.classList.remove("reveal-preload");
+
+      // Force reflow so transitions always trigger
+      void document.body.offsetHeight;
+
+      // Reveal above the fold slowly (page open animation)
+      const above = [];
+      const below = [];
+
+      elements.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.92) above.push(el);
+        else below.push(el);
+      });
+
+      setTimeout(() => {
+        above.forEach((el, i) => {
+          el.style.setProperty("--reveal-delay", `${i * 0.12}s`);
+          el.classList.add("visible");
+        });
+      }, 80);
+
+      // Scroll reveal remaining content
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.setProperty("--reveal-delay", "0s");
+            entry.target.classList.add("visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: "0px 0px -10% 0px" });
+
+      below.forEach(el => observer.observe(el));
+    });
+  </script>
+
+  {% block extra_js %}{% endblock %}
+
+  {% block extra2_js %}{% endblock %}
+  {% block extra3_js %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/features.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="feat-hero">
+  <div class="feat-container feat-hero-grid">
+
+    <div class="feat-hero-left">
+      <h1 class="feat-title">
+        Master Physics with <span>Numerical</span><br>
+        Excellence
+      </h1>
+
+      <p class="feat-subtitle">
+        Focused 90-minute sessions designed to build problem-solving mastery.
+        Track your child’s daily progress with quizzes and detailed analytics.
+      </p>
+
+      <div class="feat-hero-actions">
+        <a href="{% url 'signup' %}" class="feat-btn feat-btn-primary">Start Free Trial <span>→</span></a>
+        <a href="{% url 'contact' %}" class="feat-btn feat-btn-ghost">Watch Demo</a>
+      </div>
+
+      <div class="feat-metrics">
+        <div class="feat-metric">
+          <div class="feat-metric-num">95%</div>
+          <div class="feat-metric-label">Score Improvement</div>
+        </div>
+        <div class="feat-metric">
+          <div class="feat-metric-num">30+</div>
+          <div class="feat-metric-label">Numericals/Day</div>
+        </div>
+        <div class="feat-metric">
+          <div class="feat-metric-num">Daily</div>
+          <div class="feat-metric-label">Progress Reports</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Card -->
+    <div class="feat-hero-right">
+      <article class="feat-progress-card card">
+        <div class="feat-progress-top">
+          <h3>Today’s Progress</h3>
+          <span class="feat-pill">Class 11 Physics</span>
+        </div>
+
+        <div class="feat-progress-row">
+          <div class="feat-progress-label">Theory (45 min)</div>
+          <div class="feat-progress-status done">Completed</div>
+          <div class="feat-bar"><span class="fill fill-blue" style="width:100%"></span></div>
+        </div>
+
+        <div class="feat-progress-row">
+          <div class="feat-progress-label">Numericals (30 min)</div>
+          <div class="feat-progress-status doing">In Progress</div>
+          <div class="feat-bar"><span class="fill fill-orange" style="width:78%"></span></div>
+        </div>
+
+        <div class="feat-progress-row">
+          <div class="feat-progress-label">Quiz (15 min)</div>
+          <div class="feat-progress-status up">Upcoming</div>
+          <div class="feat-bar"><span class="fill fill-gray" style="width:12%"></span></div>
+        </div>
+
+        <div class="feat-stats">
+          <div class="feat-stat">
+            <div class="feat-stat-num">12</div>
+            <div class="feat-stat-label">Questions</div>
+          </div>
+          <div class="feat-stat">
+            <div class="feat-stat-num accent">87%</div>
+            <div class="feat-stat-label">Accuracy</div>
+          </div>
+          <div class="feat-stat">
+            <div class="feat-stat-num">5</div>
+            <div class="feat-stat-label">Day Streak</div>
+          </div>
+        </div>
+
+        <div class="feat-toast">
+          <div class="feat-toast-badge">★</div>
+          <div>
+            <div class="feat-toast-title">Quiz Completed!</div>
+            <div class="feat-toast-sub">Score: 9/10</div>
+          </div>
+        </div>
+      </article>
+    </div>
+
+  </div>
+</section>
+
+<!-- 90 MIN STRUCTURE -->
+<section class="feat-structure">
+  <div class="feat-container">
+    <div class="feat-centerhead">
+      <span class="feat-chip">Structured Learning</span>
+      <h2>Every <span>90 Minutes</span> Count</h2>
+      <p>
+        Our scientifically designed class structure maximizes learning retention and problem-solving skills.
+      </p>
+    </div>
+
+    <div class="feat-timeline card">
+      <div class="feat-timeline-bar">
+        <span class="seg seg-blue"></span>
+        <span class="seg seg-orange"></span>
+        <span class="seg seg-blue2"></span>
+      </div>
+      <div class="feat-timeline-labels">
+        <span>0 min</span>
+        <span>45 min</span>
+        <span>75 min</span>
+        <span>90 min</span>
+      </div>
+    </div>
+
+    <div class="feat-three">
+      <article class="feat-mini card">
+        <div class="feat-icon blue">📘</div>
+        <h3>Theory Foundation</h3>
+        <div class="feat-time">45 min</div>
+        <p>Core concepts explained with real-world examples and visual demonstrations.</p>
+      </article>
+
+      <article class="feat-mini card focus">
+        <div class="feat-badge">FOCUS AREA</div>
+        <div class="feat-icon orange">🧮</div>
+        <h3>Numerical Practice</h3>
+        <div class="feat-time">30 min</div>
+        <p>Focused problem-solving with step-by-step methodology.</p>
+      </article>
+
+      <article class="feat-mini card">
+        <div class="feat-icon blue">✅</div>
+        <h3>Daily Quiz</h3>
+        <div class="feat-time">15 min</div>
+        <p>Instant feedback + tracking to identify gaps immediately.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- PARENTS + ABROAD -->
+<section class="feat-gridwrap">
+  <div class="feat-container">
+    <div class="feat-centerhead">
+      <h2>Everything Parents Need to <span>Track Success</span></h2>
+      <p>
+        Complete visibility into your child’s physics journey with tools designed for modern parents —
+        ideal for families abroad too.
+      </p>
+    </div>
+
+    <div class="feat-grid">
+      <article class="feat-box card">
+        <div class="feat-icon blue">📊</div>
+        <h3>Parent Dashboard</h3>
+        <p>Real-time progress, attendance, accuracy trends, and improvement areas.</p>
+      </article>
+
+      <article class="feat-box card">
+        <div class="feat-icon orange">🎯</div>
+        <h3>Daily Quizzes</h3>
+        <p>Automated assessments after each class to reinforce learning instantly.</p>
+      </article>
+
+      <article class="feat-box card">
+        <div class="feat-icon blue">🧠</div>
+        <h3>Numerical Focus</h3>
+        <p>Daily problem targets to build speed, accuracy, and exam confidence.</p>
+      </article>
+
+      <article class="feat-box card">
+        <div class="feat-icon orange">📈</div>
+        <h3>Growth Tracking</h3>
+        <p>Week-over-week charts showing improvement in marks and mastery.</p>
+      </article>
+
+      <article class="feat-box card">
+        <div class="feat-icon blue">🔔</div>
+        <h3>Smart Notifications</h3>
+        <p>Instant updates on quiz scores, attendance, and weekly summaries.</p>
+      </article>
+
+      <article class="feat-box card">
+        <div class="feat-icon orange">🗓️</div>
+        <h3>Exam Preparation</h3>
+        <p>Regular mock tests aligned to board & entrance patterns.</p>
+      </article>
+
+      <article class="feat-box card">
+        <div class="feat-icon blue">🧩</div>
+        <h3>Concept Mastery</h3>
+        <p>See which topics are strong and which need more attention.</p>
+      </article>
+
+      <article class="feat-box card">
+        <div class="feat-icon orange">🌍</div>
+        <h3>Abroad-Friendly</h3>
+        <p>Perfect for UAE/GCC/abroad parents: clear reporting + flexible timings.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="feat-cta">
+  <div class="feat-container">
+    <div class="feat-cta-card card">
+      <h2>Ready to Transform Your Child’s <span>Physics Journey?</span></h2>
+      <p>
+        Join parents who trust Physics Mentor for conceptual clarity, numericals mastery,
+        and consistent progress tracking.
+      </p>
+
+      <div class="feat-cta-actions">
+        <a href="{% url 'contact' %}" class="feat-btn feat-btn-primary">Book Free Trial Class <span>→</span></a>
+        <a href="tel:+917306737811" class="feat-btn feat-btn-ghost">Call Us Now</a>
+      </div>
+
+      <div class="feat-cta-points">
+        <span>● No Credit Card Required</span>
+        <span>● Cancel Anytime</span>
+        <span>● Money Back Guarantee</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
