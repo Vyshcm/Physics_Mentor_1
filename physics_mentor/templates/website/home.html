@@ -3,95 +3,239 @@
 
 {% block content %}
 
-<!-- ===== Feature Carousel (CSS-only) ===== -->
-<section class="feature-carousel">
-  <div class="feature-track">
+<!-- HERO V2 SECTION -->
+<section class="hero-v2">
+    <div class="hero-content">
+        <p class="trusted">⭐ Trusted by 500+ Students</p>
+        <h1>
+            Master Physics<br>
+            <span>Like Never Before</span>
+        </h1>
+        <p class="hero-desc">
+            CBSE Class 11 & 12 Physics — Live Online Classes with structured learning, daily quizzes & parent tracking.
+        </p>
 
-    <!-- Slide 1 -->
-    <article class="feature-slide">
-      <img src="{% static 'images/phy_mentor_img3.jpg' %}" alt="Interactive Live Classes">
-      <div class="feature-overlay">
-        <h2>Interactive Live Classes</h2>
-        <p>Engage with expert faculty in real-time sessions</p>
-      </div>
-    </article>
+        <div class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-val">95<span>%</span></span>
+                <span class="stat-label">Pass Rate</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-val">4.9<span>★</span></span>
+                <span class="stat-label">Rating</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-val">90<span>min</span></span>
+                <span class="stat-label">Per Session</span>
+            </div>
+        </div>
 
-    <!-- Slide 2 -->
-    <article class="feature-slide">
-      <img src="{% static 'images/phy_mentor_img4.jpg' %}" alt="Parent Tracking">
-      <div class="feature-overlay">
-        <h2>Track Progress, Stay Informed</h2>
-        <p>Parents gain insights into student’s academic journey</p>
-      </div>
-    </article>
+        <div class="hero-buttons">
+            <a href="{% url 'signup' %}" class="btn-primary">Start Free Demo →</a>
+            <a href="{% url 'courses' %}" class="btn-outline">▷ Watch Demo</a>
+        </div>
+    </div>
 
-    <!-- Slide 3 -->
-    <article class="feature-slide">
-      <img src="{% static 'images/phy_mentor_img5.jpg' %}" alt="Quizzes & Exams">
-      <div class="feature-overlay">
-        <h2>Quizzes, Exams & Beyond</h2>
-        <p>Daily quizzes, unit tests, and practice tests</p>
-      </div>
-    </article>
-
-  </div>
-
-  <p class="feature-hint">Swipe / scroll to view →</p>
+    <div class="hero-carousel-container">
+        <div class="hero-carousel-frame">
+            <div class="hero-carousel-slides" id="hero-slides">
+                <!-- Slide 1 -->
+                <div class="hc-slide">
+                    <img src="{% static 'images/phy_mentor_img3.jpg' %}" alt="Live Class">
+                    <div class="hc-overlay-live">
+                        <div class="live-indicator"><span class="live-dot"></span> LIVE NOW</div>
+                        <h4>Interactive Live Classes</h4>
+                        <p>Engage with expert faculty in real-time</p>
+                    </div>
+                    <div class="hc-overlay-score">
+                        <span class="score-label">Today's Quiz Score</span>
+                        <span class="score-val">92%</span>
+                    </div>
+                </div>
+                <!-- Slide 2 -->
+                <div class="hc-slide">
+                    <img src="{% static 'images/phy_mentor_img4.jpg' %}" alt="Parent Tracking">
+                    <div class="hc-overlay-live">
+                        <div class="live-indicator"><span class="live-dot"
+                                style="background:var(--accent-cyan); box-shadow:0 0 10px var(--accent-cyan);"></span>
+                            DASHBOARD</div>
+                        <h4>Comprehensive Reports</h4>
+                        <p>Detailed performance insights for parents</p>
+                    </div>
+                </div>
+                <!-- Slide 3 -->
+                <div class="hc-slide">
+                    <img src="{% static 'images/phy_mentor_img5.jpg' %}" alt="Exams">
+                    <div class="hc-overlay-live">
+                        <div class="live-indicator"><span class="live-dot"
+                                style="background:var(--accent-orange); box-shadow:0 0 10px var(--accent-orange);"></span>
+                            PRACTICE</div>
+                        <h4>Elite Quiz Bank</h4>
+                        <p>Master every chapter with 10k+ problems</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 
+<!-- TOP FEATURES -->
+<section class="top-features">
+    <div class="feature-card">
+        <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15.602 3.786a5.625 5.625 0 0 0-7.204 0"></path>
+                <path d="M20.401 8.584a10.405 10.405 0 0 0-16.802 0"></path>
+                <path d="M21.75 12a9.75 9.75 0 0 1-19.5 0"></path>
+                <path d="M7 16l5 5 5-5"></path>
+                <path d="M12 21V10"></path>
+            </svg>
+        </div>
+        <h3>Live Classes</h3>
+        <p>Interactive 90-min sessions with real-time concept building.</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+        </div>
+        <h3>Doubt Solving</h3>
+        <p>AI-powered instant help and expert teacher support.</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+        </div>
+        <h3>Progress Tracking</h3>
+        <p>Detailed performance analytics and regular assessments.</p>
+    </div>
+    <div class="feature-card">
+        <div class="feature-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+        </div>
+        <h3>Parent Dashboard</h3>
+        <p>Real-time monitoring for academic consistency.</p>
+    </div>
+</section>
 
-<!-- ===== Your existing sections below ===== -->
-<section class="hero">
-    <p class="trusted">⭐ Trusted by students worldwide</p>
+<!-- HOW IT WORKS -->
+<section class="how-it-works">
+    <span class="section-label">Our Methodology</span>
+    <h2>Every 90 Minutes <span>Count</span></h2>
+    <p class="subtitle">Scientifically designed sessions for maximum learning retention.</p>
 
-    <h1>
-        Master Physics with<br>
-        <span>Expert Guidance</span>
-    </h1>
+    <div class="timeline-container">
+        <div class="timeline-bar">
+            <div class="timeline-progress"></div>
+            <span class="time-marker" style="left: 0;">0 min</span>
+            <span class="time-marker" style="left: 50%;">45 min</span>
+            <span class="time-marker" style="left: 83%;">75 min</span>
+            <span class="time-marker" style="right: 0;">90 min</span>
+        </div>
 
-    <p class="subtitle">
-        CBSE Class 11 & 12 Physics | Live Online | Parent Tracking
-    </p>
+        <div class="timeline-cards">
+            <div class="time-card tc-blue">
+                <span class="time-val">45 min</span>
+                <h4>Theory Foundation</h4>
+                <p>Core concepts with real-world examples.</p>
+            </div>
+            <div class="time-card tc-green">
+                <span class="time-val">30 min</span>
+                <h4>Numerical Practice</h4>
+                <p>Step-by-step problem solving sessions.</p>
+            </div>
+            <div class="time-card tc-yellow">
+                <span class="time-val">15 min</span>
+                <h4>Daily Quiz</h4>
+                <p>Instant feedback & gap identification.</p>
+            </div>
+        </div>
+    </div>
+</section>
 
+<!-- VISION -->
+<section class="vision-section">
+    <div class="vision-card">
+        <span class="section-label">Our Vision</span>
+        <h2>Empowering the Next Generation of Scientists</h2>
+        <p>"At Physics Mentor, we don't just teach physics; we ignite curiosity. Our vision is to make complex
+            scientific concepts accessible, engaging, and fascinating for every student, building a solid foundation for
+            their future careers in STEM."</p>
+    </div>
+</section>
+
+<!-- WHY US -->
+<section class="why-section">
+    <span class="section-label">Why Choose Us</span>
+    <h2>Excellence in <span>Physics Education</span></h2>
+
+    <div class="why-grid">
+        <div class="why-card">
+            <span class="why-number">01</span>
+            <h3>Parent-Centric Platform</h3>
+            <p>Real-time dashboards let parents track quiz scores, attendance, and academic consistency without
+                disturbing study routines.</p>
+        </div>
+        <div class="why-card">
+            <span class="why-number">02</span>
+            <h3>Structured CBSE Coverage</h3>
+            <p>Complete Class 11 & 12 Physics syllabus with chapter-wise breakdown, concept clarity, and board-exam
+                focused preparation.</p>
+        </div>
+        <div class="why-card">
+            <span class="why-number">03</span>
+            <h3>Daily Performance Quizzes</h3>
+            <p>15-minute topic-based quizzes after every session with instant feedback to identify and fill knowledge
+                gaps immediately.</p>
+        </div>
+        <div class="why-card">
+            <span class="why-number">04</span>
+            <h3>AI-Powered Doubt Solving</h3>
+            <p>Students can ask physics questions anytime to our AI Mentor and get instant, accurate, and
+                easy-to-understand explanations.</p>
+        </div>
+    </div>
+</section>
+
+<!-- READY CTA -->
+<section class="ready-section">
+    <h2>Ready to Unlock the <span>Secrets of Physics?</span></h2>
+    <p class="subtitle">Join hundreds of students transforming their understanding of physics with our proven
+        methodology.</p>
     <div class="hero-buttons">
-        <a class="btn-primary">Start Free Demo</a>
-        <a class="btn-outline">Watch Demo</a>
+        <a href="{% url 'signup' %}" class="btn-primary">Start Free Trial</a>
+        <a href="{% url 'courses' %}" class="btn-outline">Browse Courses</a>
     </div>
 </section>
 
-<section class="features">
-    <h2>Everything You Need to Excel</h2>
+{% endblock %}
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const slides = document.getElementById('hero-slides');
+        if (!slides) return;
 
-    <div class="feature-grid">
-        <div class="card">Live Classes</div>
-        <div class="card">Doubt Solving</div>
-        <div class="card">Practice Problems</div>
-        <div class="card">Progress Tracking</div>
-    </div>
-</section>
+        let index = 0;
+        const totalSlides = 3;
 
-<section class="courses">
-    <h2>Our Courses</h2>
-
-    <div class="course-grid">
-        <div class="home-course-card">
-            <h3>Class 11 Physics</h3>
-            <p>Concept clarity + numericals</p>
-        </div>
-        <div class="home-course-card">
-            <h3>Class 12 Physics</h3>
-            <p>Board exam focused</p>
-        </div>
-    </div>
-</section>
-
-<section class="cta">
-    <h2>Ready to Unlock the Secrets of Physics?</h2>
-    <a class="btn-primary">Start Free Trial</a>
-</section>
-
-<footer class="footer">
-    <p>© 2026 Physics Mentor</p>
-</footer>
-
+        setInterval(() => {
+            index = (index + 1) % totalSlides;
+            slides.style.transform = `translateX(-${(index * 100) / totalSlides}%)`;
+        }, 5000); // Rotate every 5 seconds
+    });
+</script>
 {% endblock %}
