@@ -102,6 +102,17 @@
         background: #0056b3;
     }
 </style>
+
+<!-- MathJax Configuration -->
+<script>
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$']]
+        }
+    };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -145,6 +156,12 @@
 
             chatMessages.appendChild(msgDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Trigger MathJax re-render if it's an AI message
+            if (isMarkdown && window.MathJax) {
+                MathJax.typesetPromise();
+            }
+
             return msgDiv;
         }
 

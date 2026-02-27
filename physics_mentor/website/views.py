@@ -73,7 +73,7 @@ def ai_chat(request):
             payload = {
                 "model": "deepseek-chat",
                 "messages": [
-                    {"role": "system", "content": "You are a helpful Physics Mentor AI for students. Explain clearly and simply. Provide step-by-step explanation when needed. Keep responses concise."},
+                    {"role": "system", "content": "You are a helpful Physics Mentor AI for students. Explain clearly and simply. Use LaTeX formatting for all mathematical equations. Wrap inline equations in $...$. Wrap display equations in $$...$$. Do not use markdown headers. Keep responses clean and concise."},
                     {"role": "user", "content": user_message}
                 ],
                 "stream": False
