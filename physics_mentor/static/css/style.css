@@ -1,3 +1,9 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 :root {
   --bg-dark: #020617;
   --bg-card: rgba(30, 41, 59, 0.5);
@@ -111,7 +117,10 @@ body {
 
 .page-container {
   padding: 0;
-  /* Removing fixed padding for better control */
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 
