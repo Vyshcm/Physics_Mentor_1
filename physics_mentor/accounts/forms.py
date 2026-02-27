@@ -1,6 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm,AuthenticationForm,PasswordResetForm
 from django.contrib.auth.models import User
 from django import forms
+from .models import Feedback
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
 
@@ -60,3 +61,15 @@ class ForgotPasswordForm(forms.Form):
             validate_password(p1)
 
         return cleaned_data
+
+class FeedbackForm(forms.ModelForm):
+    RATING_CHOICES = [(i, str(i)) for i in range(1, 6)]
+    rating = forms.ChoiceField(choices=[('', 'Select Rating')] + RATING_CHOICES, required=False, widget=forms.Select(attrs={'class': 'form-select'}))
+
+    class Meta:
+        model = Feedback
+        fields = ['subject', 'message', 'rating']
+        widgets = {
+            'subject': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Subject (Optional)'}),
+            'message': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Tell us what you think...', 'rows': 5}),
+        }

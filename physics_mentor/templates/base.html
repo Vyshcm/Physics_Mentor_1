@@ -22,7 +22,8 @@
 <body>
 
   <nav class="navbar">
-    <div class="logo">Physics<span>Mentor</span></div>
+    <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'login' %}{% endif %}" class="logo"
+      style="text-decoration: none; color: white;">Physics<span>Mentor</span></a>
 
     {% if not request.user.is_authenticated %}
     <ul class="nav-links">

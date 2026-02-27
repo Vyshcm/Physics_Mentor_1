@@ -1,10 +1,11 @@
 from django.shortcuts import render,redirect
-from .forms import SignupForm,LoginForm,ForgotPasswordForm
+from django.contrib.auth.decorators import login_required
+from .forms import SignupForm,LoginForm,ForgotPasswordForm,FeedbackForm
 from django.contrib import messages
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.models import User
-from .models import UserProfile
+from .models import UserProfile,Feedback
 
 from django.db import IntegrityError
 
@@ -122,3 +123,18 @@ def payment_success(request):
         return redirect('dashboard')
         
     return redirect('dashboard')
+
+@login_required
+def feedback_view(request):
+    if request.method == "POST":
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.student = request.user
+            feedback.save()
+            messages.success(request, "Thanks! Your feedback was submitted.")
+            return redirect('feedback')
+    else:
+        form = FeedbackForm()
+    
+    return render(request, 'accounts/feedback.html', {'form': form})

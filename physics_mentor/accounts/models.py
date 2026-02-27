@@ -14,3 +14,19 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.role}"
+
+class Feedback(models.Model):
+    STATUS_CHOICES = [
+        ('new', 'New'),
+        ('reviewed', 'Reviewed'),
+        ('resolved', 'Resolved'),
+    ]
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='feedbacks')
+    subject = models.CharField(max_length=200, blank=True)
+    message = models.TextField()
+    rating = models.IntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+
+    def __str__(self):
+        return f"Feedback from {self.student.username} - {self.subject or 'No Subject'}"

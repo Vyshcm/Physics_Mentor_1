@@ -523,7 +523,7 @@
         </a>{% endif %}
 
         <!-- Feedback -->
-        {% if is_paid %}<a href="#" style="text-decoration: none; color: inherit;">{% endif %}
+        {% if is_paid %}<a href="{% url 'feedback' %}" style="text-decoration: none; color: inherit;">{% endif %}
             <div class="dashboard-card">
                 <div class="card-icon icon-cyan">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
