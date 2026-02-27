@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm,AuthenticationForm,PasswordResetForm
 from django.contrib.auth.models import User
 from django import forms
-from .models import Feedback
+from .models import Feedback, Doubt
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
 
@@ -72,4 +72,13 @@ class FeedbackForm(forms.ModelForm):
         widgets = {
             'subject': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Subject (Optional)'}),
             'message': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Tell us what you think...', 'rows': 5}),
+        }
+
+class DoubtForm(forms.ModelForm):
+    class Meta:
+        model = Doubt
+        fields = ['title', 'question']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Topic (Optional)'}),
+            'question': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'What is your doubt?', 'rows': 5}),
         }

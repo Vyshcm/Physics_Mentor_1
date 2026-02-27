@@ -30,3 +30,21 @@ class Feedback(models.Model):
 
     def __str__(self):
         return f"Feedback from {self.student.username} - {self.subject or 'No Subject'}"
+
+class Doubt(models.Model):
+    STATUS_CHOICES = [
+        ('new', 'New'),
+        ('replied', 'Replied'),
+        ('closed', 'Closed'),
+    ]
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='doubts')
+    title = models.CharField(max_length=200, blank=True)
+    question = models.TextField()
+    admin_reply = models.TextField(blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    created_at = models.DateTimeField(auto_now_add=True)
+    replied_at = models.DateTimeField(blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Doubt from {self.student.username}: {self.title or 'No Title'}"

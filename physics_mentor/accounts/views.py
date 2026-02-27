@@ -1,11 +1,11 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth.decorators import login_required
-from .forms import SignupForm,LoginForm,ForgotPasswordForm,FeedbackForm
+from .forms import SignupForm,LoginForm,ForgotPasswordForm,FeedbackForm,DoubtForm
 from django.contrib import messages
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.models import User
-from .models import UserProfile,Feedback
+from .models import UserProfile,Feedback,Doubt
 
 from django.db import IntegrityError
 
@@ -138,3 +138,19 @@ def feedback_view(request):
         form = FeedbackForm()
     
     return render(request, 'accounts/feedback.html', {'form': form})
+
+@login_required
+def doubt_sessions_view(request):
+    if request.method == "POST":
+        form = DoubtForm(request.POST)
+        if form.is_valid():
+            doubt = form.save(commit=False)
+            doubt.student = request.user
+            doubt.save()
+            messages.success(request, "Your doubt has been submitted successfully.")
+            return redirect('doubt_sessions')
+    else:
+        form = DoubtForm()
+    
+    doubts = Doubt.objects.filter(student=request.user).order_by('-created_at')
+    return render(request, 'accounts/doubt_sessions.html', {'form': form, 'doubts': doubts})
