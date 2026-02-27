@@ -1,35 +1,51 @@
-    {% load static %}
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Login</title>
-        <link rel="stylesheet" href="{% static 'css/login.css' %}">
-    </head>
-    <body>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <style>
+        .auth-logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            z-index: 1000;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        }
+
+        .auth-logo:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="{% url 'home' %}" class="auth-logo">PhysicsMentor</a>
     <div class="login">
-    <div class="login-box">
-    <h1>Login</h1>
-    {% if messages %}
-    {% for message in messages %}
-        <p>{{ message }}</p>
-    {% endfor %}
-    {% endif %}
-    <form action="" method="POST">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <div class="login-button">
-            <input type="submit" value="Login">
+        <div class="login-box">
+            <h1>Login</h1>
+            <form action="" method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="login-button">
+                    <input type="submit" value="Login">
+                </div>
+            </form>
+            <a href="{% url 'forgotpassword' %}">Forgot-Password</a>
+            <a href="{% url 'signup' %}">Register</a>
         </div>
-    </form>
-     <a href="{% url 'forgotpassword' %}">Forgot-Password</a>
-     <a href="{% url 'signup' %}">Register</a>
-    </div>
     </div>
     <script>
         document.getElementById("id_username").placeholder = "Username";
         document.getElementById("id_password").placeholder = "Password";
     </script>
-    </body>
-    </html>
+</body>
+
+</html>

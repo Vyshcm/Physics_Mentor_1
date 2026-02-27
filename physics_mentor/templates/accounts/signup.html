@@ -1,24 +1,45 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
     <link rel="stylesheet" href="{% static 'css/signup.css' %}">
+    <style>
+        .auth-logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+            z-index: 1000;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        }
+
+        .auth-logo:hover {
+            opacity: 0.8;
+        }
+    </style>
 </head>
+
 <body>
-<div class="signup">
-<div class="signup-box">
-<h1>Signup</h1>
-<form action="" method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-<div class="signup-button">
-    <input type="submit" value="Signup">
-</div>
-</form>
-</div>
-</div>
+    <a href="{% url 'home' %}" class="auth-logo">PhysicsMentor</a>
+    <div class="signup">
+        <div class="signup-box">
+            <h1>Signup</h1>
+            <form action="" method="POST">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="signup-button">
+                    <input type="submit" value="Signup">
+                </div>
+            </form>
+        </div>
+    </div>
 </body>
+
 </html>
