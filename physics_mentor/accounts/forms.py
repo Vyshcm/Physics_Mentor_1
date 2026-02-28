@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm,AuthenticationForm,PasswordResetForm
 from django.contrib.auth.models import User
 from django import forms
-from .models import Feedback, Doubt, Assignment, Quiz, Payment, Exam
+from .models import UserProfile, Feedback, Doubt, Assignment, Quiz, Payment, Exam, Question
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
 
@@ -113,20 +113,38 @@ class ParentCreationForm(forms.ModelForm):
 class AssignmentCreationForm(forms.ModelForm):
     class Meta:
         model = Assignment
-        fields = ['title', 'description', 'due_date']
+        fields = ['title', 'description', 'due_date', 'attachment']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Assignment Title'}),
             'description': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Detailed instructions...', 'rows': 4}),
             'due_date': forms.DateTimeInput(attrs={'class': 'form-input', 'type': 'datetime-local'}),
+            'attachment': forms.ClearableFileInput(attrs={'class': 'form-input'}),
         }
 
 class QuizCreationForm(forms.ModelForm):
     class Meta:
         model = Quiz
-        fields = ['title', 'total_marks']
+        fields = ['title', 'description', 'total_marks', 'duration_minutes', 'due_date']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Quiz Title'}),
+            'description': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Quiz Description...', 'rows': 3}),
             'total_marks': forms.NumberInput(attrs={'class': 'form-input', 'placeholder': 'Total Marks'}),
+            'duration_minutes': forms.NumberInput(attrs={'class': 'form-input', 'placeholder': 'Duration in minutes'}),
+            'due_date': forms.DateTimeInput(attrs={'class': 'form-input', 'type': 'datetime-local'}),
+        }
+
+class QuestionCreationForm(forms.ModelForm):
+    class Meta:
+        model = Question
+        fields = ['text', 'option_a', 'option_b', 'option_c', 'option_d', 'correct_option', 'marks']
+        widgets = {
+            'text': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Enter question text...', 'rows': 3}),
+            'option_a': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Option A'}),
+            'option_b': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Option B'}),
+            'option_c': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Option C'}),
+            'option_d': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Option D'}),
+            'correct_option': forms.Select(attrs={'class': 'form-input'}),
+            'marks': forms.NumberInput(attrs={'class': 'form-input'}),
         }
 
 class RecordPaymentForm(forms.ModelForm):

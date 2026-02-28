@@ -134,3 +134,7 @@ RAZORPAY_KEY_SECRET = 'YOUR_SECRET_HERE'
 # DeepSeek Configuration
 import os
 DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', 'YOUR_DEEPSEEK_API_KEY_HERE')
+
+# Media files configuration
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'

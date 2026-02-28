@@ -60,6 +60,8 @@
         border-radius: 8px;
         margin-bottom: 20px;
         border-left: 4px solid #33c1a8;
+        color: #1e293b;
+        font-weight: 500;
     }
 
     .reply-box {
@@ -114,15 +116,22 @@
             </div>
 
             <div class="question-box">
-                <p style="margin: 0; white-space: pre-wrap;">{{ doubt.question }}</p>
+                <p style="margin: 0; white-space: pre-wrap;">{{ doubt.question|default:"No question text provided" }}
+                </p>
             </div>
 
             {% if doubt.admin_reply %}
             <div class="reply-box"
                 style="background: #f0fdf4; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981;">
-                <p style="margin: 0 0 5px 0; font-weight: 700; color: #065f46; font-size: 0.8rem;">YOUR REPLY • {{
-                    doubt.replied_at|date:"M d, h:i A" }}</p>
-                <p style="margin: 0;">{{ doubt.admin_reply }}</p>
+                <p style="margin: 0 0 5px 0; font-weight: 700; color: #064e3b; font-size: 0.8rem;">
+                    YOUR REPLY •
+                    {% if doubt.replied_at %}
+                    {{ doubt.replied_at|date:"M d, h:i A" }}
+                    {% else %}
+                    Just Now
+                    {% endif %}
+                </p>
+                <p style="margin: 0; color: #1e293b; line-height: 1.5;">{{ doubt.admin_reply }}</p>
             </div>
             {% endif %}
 

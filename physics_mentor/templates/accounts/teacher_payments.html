@@ -52,6 +52,8 @@
     .data-table td {
         padding: 15px;
         border-top: 1px solid #edf2f7;
+        color: #1e293b;
+        /* Dark text for visibility */
     }
 
     .badge-paid {
@@ -116,39 +118,46 @@
         </button>
     </div>
 
-    <div style="overflow-x: auto;">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Student</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th>Subscription Valid Until</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for payment in payments %}
-                <tr>
-                    <td>
-                        <div style="font-weight: 600;">{{ payment.student.get_full_name|default:payment.student.username
-                            }}</div>
-                        <div style="font-size: 0.8rem; color: #64748b;">@{{ payment.student.username }}</div>
-                    </td>
-                    <td style="font-weight: 600;">₹{{ payment.amount }}</td>
-                    <td><span class="badge-paid">{{ payment.status|title }}</span></td>
-                    <td>{{ payment.payment_date|date:"M d, Y" }}</td>
-                    <td><strong style="color: #33c1a8;">{{ payment.expiry_date_after_payment|date:"M d, Y"|default:"-"
-                            }}</strong></td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" style="text-align: center; color: #64748b; padding: 40px;">No payment records found.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div>
+        <h2 style="margin-bottom: 20px;">Transaction History</h2>
+        <div style="overflow-x: auto;">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Valid Until / Expiry</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                        <td>
+                            {% with name=payment.student.get_full_name|default:payment.student.username %}
+                            <div style="font-weight: 600; color: #1e293b;">{{ name }}</div>
+                            {% endwith %}
+                            <div style="font-size: 0.8rem; color: #64748b;">@{{ payment.student.username }}</div>
+                        </td>
+                        <td style="font-weight: 700; color: #0f172a;">₹{{ payment.amount }}</td>
+                        <td><span class="badge-paid">{{ payment.status|title|default:"Paid" }}</span></td>
+                        <td style="color: #475569;">{{ payment.payment_date|date:"M d, Y"|default:"-" }}</td>
+                        <td>
+                            {% with expiry=payment.expiry_date_after_payment|date:"M d, Y"|default:"-" %}
+                            <strong style="color: #33c1a8;">{{ expiry }}</strong>
+                            {% endwith %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #64748b; padding: 40px;">No transactions yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 

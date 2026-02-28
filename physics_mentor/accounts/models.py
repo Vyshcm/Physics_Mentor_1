@@ -111,11 +111,34 @@ class Attendance(models.Model):
 
 class Quiz(models.Model):
     title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
     total_marks = models.IntegerField()
+    duration_minutes = models.IntegerField(default=30)
+    due_date = models.DateTimeField(null=True, blank=True)
+    is_published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
+
+class Question(models.Model):
+    OPTION_CHOICES = [
+        ('A', 'Option A'),
+        ('B', 'Option B'),
+        ('C', 'Option C'),
+        ('D', 'Option D'),
+    ]
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
+    text = models.TextField()
+    option_a = models.CharField(max_length=255)
+    option_b = models.CharField(max_length=255)
+    option_c = models.CharField(max_length=255)
+    option_d = models.CharField(max_length=255)
+    correct_option = models.CharField(max_length=1, choices=OPTION_CHOICES)
+    marks = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f"Q: {self.text[:50]}..."
 
 class QuizResult(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='quiz_results')
@@ -147,6 +170,7 @@ class Assignment(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     due_date = models.DateTimeField()
+    attachment = models.FileField(upload_to='assignments/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

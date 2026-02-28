@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.models import User
-from .models import UserProfile, Feedback, Doubt, ParentProfile, ParentMessage, Payment, Attendance, Quiz, QuizResult, Exam, ExamResult, Assignment, AssignmentSubmission
+from .models import UserProfile, Feedback, Doubt, ParentProfile, ParentMessage, Payment, Attendance, Quiz, QuizResult, Exam, ExamResult, Assignment, AssignmentSubmission, Question
 
 from django.db import IntegrityError
 
@@ -476,7 +476,7 @@ def teacher_assignments_view(request):
 
     if request.method == "POST":
         if "create_assignment" in request.POST:
-            form = AssignmentCreationForm(request.POST)
+            form = AssignmentCreationForm(request.POST, request.FILES)
             if form.is_valid():
                 form.save()
                 messages.success(request, "Assignment created successfully.")
@@ -538,8 +538,16 @@ def teacher_payments_view(request):
             messages.success(request, f"Payment recorded for {payment.student.username}. Subscription extended to {expiry}.")
             return redirect('teacher_payments')
 
+    # Fetch all payment transactions for history
     payments = Payment.objects.all().order_by('-payment_date').select_related('student')
-    return render(request, 'accounts/teacher_payments.html', {'payments': payments, 'form': form})
+    
+    print(f"DEBUG: Total Payments found: {payments.count()}")
+    
+    context = {
+        'payments': payments,
+        'form': form,
+    }
+    return render(request, 'accounts/teacher_payments.html', context)
 
 @teacher_required
 def teacher_doubts_view(request):
@@ -623,3 +631,41 @@ def student_performance_view(request, student_id):
         'submissions': submissions,
     }
     return render(request, 'accounts/student_performance.html', context)
+from .models import Question
+
+@teacher_required
+def teacher_quiz_questions_view(request, quiz_id):
+    quiz = Quiz.objects.get(id=quiz_id)
+    from .forms import QuestionCreationForm
+    form = QuestionCreationForm()
+
+    if request.method == "POST":
+        if "add_question" in request.POST:
+            form = QuestionCreationForm(request.POST)
+            if form.is_valid():
+                question = form.save(commit=False)
+                question.quiz = quiz
+                question.save()
+                messages.success(request, "Question added successfully.")
+                return redirect("teacher_quiz_questions", quiz_id=quiz.id)
+        elif "delete_question" in request.POST:
+            question_id = request.POST.get("question_id")
+            Question.objects.filter(id=question_id).delete()
+            messages.success(request, "Question deleted.")
+            return redirect("teacher_quiz_questions", quiz_id=quiz.id)
+
+    questions = quiz.questions.all()
+    return render(request, "accounts/teacher_quiz_questions.html", {
+        "quiz": quiz,
+        "questions": questions,
+        "form": form
+    })
+
+@teacher_required
+def teacher_quiz_toggle_publish(request, quiz_id):
+    quiz = Quiz.objects.get(id=quiz_id)
+    quiz.is_published = not quiz.is_published
+    quiz.save()
+    status = "Published" if quiz.is_published else "Unpublished"
+    messages.success(request, f"Quiz {quiz.title} is now {status}.")
+    return redirect("teacher_quizzes")
