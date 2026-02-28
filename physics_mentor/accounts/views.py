@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import SignupForm,LoginForm,ForgotPasswordForm,FeedbackForm,DoubtForm
 from django.contrib import messages
 from django.contrib.auth import login as auth_login
@@ -37,27 +37,25 @@ def Login(request):
             messages.success(request, "Logged in successfully!")
             
             # Role-based redirect
+            if user.is_staff or user.is_superuser:
+                UserProfile.objects.get_or_create(user=user, defaults={'role': 'Teacher'})
+                return redirect('teacher_dashboard')
+
             try:
-                # 1. Parent Check (Priority)
+                # 1. Parent Check
                 if hasattr(user, 'parent_profile'):
                     return redirect('parent_dashboard')
                 
-                # 2. Staff/Admin Check
-                if user.is_staff:
-                    return redirect('/admin/')
-
-                # 3. UserProfile Role Check
+                # 2. UserProfile Role Check
                 profile = user.userprofile
                 if profile.role == 'Teacher':
-                    return redirect('dashboard')
+                    return redirect('teacher_dashboard')
                 elif profile.role == 'Parent':
                     return redirect('parent_dashboard')
                 else: # Student
                     return redirect('dashboard')
             except UserProfile.DoesNotExist:
-                # Fallback if profile missing
-                if user.is_staff:
-                    return redirect('/admin/')
+                # Fallback: Students usually have profiles, others can go to dashboard to get one
                 return redirect('dashboard')
     return render(request,'accounts/login.html',{'form':form})
 
@@ -73,8 +71,8 @@ def dashboard(request):
         profile.role = 'Parent'
         profile.save()
 
-    if profile.role == 'Teacher':
-        return render(request, 'accounts/teacher_dashboard.html')
+    if request.user.is_staff or request.user.is_superuser or profile.role == 'Teacher':
+        return redirect('teacher_dashboard')
     elif profile.role == 'Parent':
         return redirect('parent_dashboard')
     else: # Student
@@ -342,3 +340,286 @@ def parent_dashboard_view(request):
     }
     
     return render(request, 'accounts/parent_dashboard.html', context)
+
+# --- Teacher/Admin Dashboard Views ---
+
+def is_teacher(user):
+    return user.is_authenticated and (user.is_staff or user.is_superuser or (hasattr(user, 'userprofile') and user.userprofile.role == 'Teacher'))
+
+def teacher_required(view_func):
+    from functools import wraps
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not is_teacher(request.user):
+            if request.user.is_authenticated:
+                messages.error(request, "Access denied. You do not have teacher permissions.")
+                return redirect('dashboard')
+            return redirect('login')
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
+@teacher_required
+def teacher_dashboard_view(request):
+    from django.utils import timezone
+    from datetime import timedelta
+    today = timezone.now().date()
+    seven_days_later = today + timedelta(days=7)
+
+    # Summary Stats
+    total_students = UserProfile.objects.filter(role='Student').count()
+    active_subscriptions = UserProfile.objects.filter(role='Student', is_paid=True).count()
+    
+    expiring_soon = UserProfile.objects.filter(
+        role='Student', 
+        is_paid=True, 
+        subscription_end_date__range=[today, seven_days_later]
+    ).count()
+    
+    unpaid_students = UserProfile.objects.filter(role='Student', is_paid=False).count()
+    pending_doubts = Doubt.objects.filter(status='new').count()
+    pending_messages = ParentMessage.objects.filter(status='new').count()
+
+    context = {
+        'total_students': total_students,
+        'active_subscriptions': active_subscriptions,
+        'expiring_soon': expiring_soon,
+        'unpaid_students': unpaid_students,
+        'pending_doubts': pending_doubts,
+        'pending_messages': pending_messages,
+    }
+    return render(request, 'accounts/teacher_dashboard.html', context)
+
+@teacher_required
+def teacher_students_view(request):
+    from .forms import StudentCreationForm, ParentCreationForm
+    student_form = StudentCreationForm()
+    parent_form = ParentCreationForm()
+
+    if request.method == "POST":
+        if "add_student" in request.POST:
+            student_form = StudentCreationForm(request.POST)
+            if student_form.is_valid():
+                user = student_form.save(commit=False)
+                user.set_password(student_form.cleaned_data['password'])
+                user.save()
+                UserProfile.objects.create(
+                    user=user, 
+                    role='Student', 
+                    student_class=student_form.cleaned_data.get('class_name')
+                )
+                messages.success(request, f"Student {user.username} added successfully.")
+                return redirect('teacher_students')
+        
+        elif "add_parent" in request.POST:
+            parent_form = ParentCreationForm(request.POST)
+            if parent_form.is_valid():
+                user = parent_form.save(commit=False)
+                user.set_password(parent_form.cleaned_data['password'])
+                user.save()
+                UserProfile.objects.create(user=user, role='Parent')
+                ParentProfile.objects.create(
+                    user=user,
+                    student=parent_form.cleaned_data['student'],
+                    parent_name=f"{user.first_name} {user.last_name}".strip() or user.username
+                )
+                messages.success(request, f"Parent account for {user.username} created and linked.")
+                return redirect('teacher_students')
+
+    # Search functionality
+    query = request.GET.get('q', '')
+    if query:
+        students = UserProfile.objects.filter(role='Student', user__username__icontains=query).select_related('user')
+    else:
+        students = UserProfile.objects.filter(role='Student').select_related('user')
+    
+    return render(request, 'accounts/teacher_students.html', {
+        'students': students, 
+        'query': query,
+        'student_form': student_form,
+        'parent_form': parent_form
+    })
+
+@teacher_required
+def teacher_attendance_view(request):
+    from django.utils import timezone
+    date_str = request.GET.get('date', timezone.now().date().isoformat())
+    selected_date = timezone.datetime.strptime(date_str, '%Y-%m-%d').date()
+
+    if request.method == "POST":
+        # Process attendance marking
+        students = UserProfile.objects.filter(role='Student')
+        for profile in students:
+            status = request.POST.get(f'attendance_{profile.user.id}')
+            if status:
+                Attendance.objects.update_or_create(
+                    student=profile.user,
+                    date=selected_date,
+                    defaults={'status': status}
+                )
+        messages.success(request, f"Attendance for {selected_date} updated successfully.")
+        return redirect(f"{request.path}?date={date_str}")
+
+    students = UserProfile.objects.filter(role='Student').select_related('user')
+    attendance_records = Attendance.objects.filter(date=selected_date)
+    attendance_dict = {a.student_id: a.status for a in attendance_records}
+
+    return render(request, 'accounts/teacher_attendance.html', {
+        'students': students,
+        'selected_date': selected_date,
+        'attendance_dict': attendance_dict,
+    })
+
+@teacher_required
+def teacher_assignments_view(request):
+    from .forms import AssignmentCreationForm
+    form = AssignmentCreationForm()
+
+    if request.method == "POST":
+        if "create_assignment" in request.POST:
+            form = AssignmentCreationForm(request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Assignment created successfully.")
+                return redirect('teacher_assignments')
+        elif "delete_assignment" in request.POST:
+            assignment_id = request.POST.get('assignment_id')
+            Assignment.objects.filter(id=assignment_id).delete()
+            messages.success(request, "Assignment deleted.")
+            return redirect('teacher_assignments')
+
+    assignments = Assignment.objects.all().order_by('-created_at')
+    return render(request, 'accounts/teacher_assignments.html', {'assignments': assignments, 'form': form})
+
+@teacher_required
+def teacher_quizzes_view(request):
+    from .forms import QuizCreationForm
+    form = QuizCreationForm()
+
+    if request.method == "POST":
+        if "create_quiz" in request.POST:
+            form = QuizCreationForm(request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Quiz created successfully.")
+                return redirect('teacher_quizzes')
+        elif "delete_quiz" in request.POST:
+            quiz_id = request.POST.get('quiz_id')
+            Quiz.objects.filter(id=quiz_id).delete()
+            messages.success(request, "Quiz deleted.")
+            return redirect('teacher_quizzes')
+
+    quizzes = Quiz.objects.all().order_by('-created_at')
+    return render(request, 'accounts/teacher_quizzes.html', {'quizzes': quizzes, 'form': form})
+
+@teacher_required
+def teacher_payments_view(request):
+    from .forms import RecordPaymentForm
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    form = RecordPaymentForm()
+    if request.method == "POST":
+        form = RecordPaymentForm(request.POST)
+        if form.is_valid():
+            payment = form.save(commit=False)
+            payment.status = 'paid'
+            
+            # Update student profile
+            student_profile = payment.student.userprofile
+            student_profile.is_paid = True
+            # Set expiry to 30 days from now
+            expiry = timezone.now().date() + timedelta(days=30)
+            student_profile.subscription_end_date = expiry
+            student_profile.save()
+            
+            payment.expiry_date_after_payment = expiry
+            payment.save()
+            
+            messages.success(request, f"Payment recorded for {payment.student.username}. Subscription extended to {expiry}.")
+            return redirect('teacher_payments')
+
+    payments = Payment.objects.all().order_by('-payment_date').select_related('student')
+    return render(request, 'accounts/teacher_payments.html', {'payments': payments, 'form': form})
+
+@teacher_required
+def teacher_doubts_view(request):
+    from .forms import AdminReplyForm
+    from django.utils import timezone
+    
+    if request.method == "POST":
+        doubt_id = request.POST.get('doubt_id')
+        reply_text = request.POST.get('admin_reply')
+        if doubt_id and reply_text:
+            doubt = Doubt.objects.get(id=doubt_id)
+            doubt.admin_reply = reply_text
+            doubt.status = 'replied'
+            doubt.replied_at = timezone.now()
+            doubt.save()
+            messages.success(request, f"Reply sent to {doubt.student.username}.")
+            return redirect('teacher_doubts')
+
+    doubts = Doubt.objects.all().order_by('-created_at').select_related('student')
+    form = AdminReplyForm()
+    return render(request, 'accounts/teacher_doubts.html', {'doubts': doubts, 'form': form})
+
+@teacher_required
+def teacher_parent_messages_view(request):
+    from django.utils import timezone
+    if request.method == "POST":
+        message_id = request.POST.get('message_id')
+        reply_text = request.POST.get('admin_reply')
+        if message_id and reply_text:
+            msg = ParentMessage.objects.get(id=message_id)
+            msg.admin_reply = reply_text
+            msg.status = 'replied'
+            msg.replied_at = timezone.now()
+            msg.save()
+            messages.success(request, f"Reply sent to Parent {msg.parent.username}.")
+            return redirect('teacher_parent_messages')
+
+    messages_list = ParentMessage.objects.all().order_by('-created_at').select_related('parent', 'student')
+    return render(request, 'accounts/teacher_parent_messages.html', {'messages_list': messages_list})
+@teacher_required
+def teacher_exams_view(request):
+    from .forms import ExamCreationForm
+    form = ExamCreationForm()
+
+    if request.method == "POST":
+        if "create_exam" in request.POST:
+            form = ExamCreationForm(request.POST)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Exam created successfully.")
+                return redirect('teacher_exams')
+        elif "delete_exam" in request.POST:
+            exam_id = request.POST.get('exam_id')
+            Exam.objects.filter(id=exam_id).delete()
+            messages.success(request, "Exam deleted.")
+            return redirect('teacher_exams')
+
+    exams = Exam.objects.all().order_by('-created_at')
+    return render(request, 'accounts/teacher_exams.html', {'exams': exams, 'form': form})
+
+@teacher_required
+def student_performance_view(request, student_id):
+    student = User.objects.get(id=student_id)
+    
+    quiz_results = QuizResult.objects.filter(student=student).select_related('quiz')
+    exam_results = ExamResult.objects.filter(student=student).select_related('exam')
+    attendance = Attendance.objects.filter(student=student).order_by('-date')
+    submissions = AssignmentSubmission.objects.filter(student=student).select_related('assignment')
+    
+    # Calculate attendance percentage
+    total_days = attendance.count()
+    present_days = attendance.filter(status='Present').count()
+    attendance_pct = round((present_days / total_days * 100), 1) if total_days > 0 else 0
+
+    context = {
+        'student': student,
+        'quiz_results': quiz_results,
+        'exam_results': exam_results,
+        'attendance': attendance,
+        'attendance_pct': attendance_pct,
+        'submissions': submissions,
+    }
+    return render(request, 'accounts/student_performance.html', context)

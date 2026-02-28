@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm,AuthenticationForm,PasswordResetForm
 from django.contrib.auth.models import User
 from django import forms
-from .models import Feedback, Doubt
+from .models import Feedback, Doubt, Assignment, Quiz, Payment, Exam
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
 
@@ -82,3 +82,70 @@ class DoubtForm(forms.ModelForm):
             'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Topic (Optional)'}),
             'question': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'What is your doubt?', 'rows': 5}),
         }
+
+class StudentCreationForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-input', 'placeholder': 'Password'}))
+    class_name = forms.CharField(max_length=20, required=False, widget=forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Class (e.g. 10th)'}))
+    
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Username'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'First Name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Last Name'}),
+            'email': forms.EmailInput(attrs={'class': 'form-input', 'placeholder': 'Email (Optional)'}),
+        }
+
+class ParentCreationForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-input', 'placeholder': 'Password'}))
+    student = forms.ModelChoiceField(queryset=User.objects.filter(userprofile__role='Student'), widget=forms.Select(attrs={'class': 'form-input'}))
+    
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Username (Parent)'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'First Name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Last Name'}),
+        }
+
+class AssignmentCreationForm(forms.ModelForm):
+    class Meta:
+        model = Assignment
+        fields = ['title', 'description', 'due_date']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Assignment Title'}),
+            'description': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Detailed instructions...', 'rows': 4}),
+            'due_date': forms.DateTimeInput(attrs={'class': 'form-input', 'type': 'datetime-local'}),
+        }
+
+class QuizCreationForm(forms.ModelForm):
+    class Meta:
+        model = Quiz
+        fields = ['title', 'total_marks']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Quiz Title'}),
+            'total_marks': forms.NumberInput(attrs={'class': 'form-input', 'placeholder': 'Total Marks'}),
+        }
+
+class RecordPaymentForm(forms.ModelForm):
+    student = forms.ModelChoiceField(queryset=User.objects.filter(userprofile__role='Student'), widget=forms.Select(attrs={'class': 'form-input'}))
+    class Meta:
+        model = Payment
+        fields = ['student', 'amount']
+        widgets = {
+            'amount': forms.NumberInput(attrs={'class': 'form-input', 'placeholder': 'Amount (e.g. 1999)'}),
+        }
+
+class ExamCreationForm(forms.ModelForm):
+    class Meta:
+        model = Exam
+        fields = ['title', 'total_marks']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Exam Title'}),
+            'total_marks': forms.NumberInput(attrs={'class': 'form-input', 'placeholder': 'Total Marks'}),
+        }
+
+class AdminReplyForm(forms.Form):
+    admin_reply = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Write your reply here...', 'rows': 4}))

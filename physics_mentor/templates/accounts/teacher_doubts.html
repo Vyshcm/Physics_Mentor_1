@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .manage-container {
+        padding: 40px 5%;
+    }
+
+    .doubt-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .doubt-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        border: 1px solid #edf2f7;
+    }
+
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .status-new {
+        background: #fee2e2;
+        color: #ef4444;
+    }
+
+    .status-replied {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .doubt-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+
+    .student-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.9rem;
+        color: #64748b;
+    }
+
+    .question-box {
+        background: #f8f9fc;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #33c1a8;
+    }
+
+    .reply-box {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px dashed #e2e8f0;
+    }
+
+    .form-textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-family: inherit;
+        margin-bottom: 10px;
+    }
+
+    .btn-reply {
+        background: #33c1a8;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-reply:hover {
+        background: #2db099;
+    }
+</style>
+
+<div class="manage-container">
+    <h1>Doubts Inbox</h1>
+    <p style="color: #64748b; margin-bottom: 30px;">Manage and respond to student queries.</p>
+
+    <div class="doubt-list">
+        {% for doubt in doubts %}
+        <div class="doubt-card">
+            <div class="doubt-header">
+                <div>
+                    <h3 style="margin: 0 0 5px 0;">{{ doubt.title|default:"No Title" }}</h3>
+                    <div class="student-info">
+                        <strong>{{ doubt.student.get_full_name|default:doubt.student.username }}</strong>
+                        <span>•</span>
+                        <span>{{ doubt.created_at|date:"M d, h:i A" }}</span>
+                    </div>
+                </div>
+                <span class="status-badge status-{{ doubt.status }}">
+                    {{ doubt.get_status_display }}
+                </span>
+            </div>
+
+            <div class="question-box">
+                <p style="margin: 0; white-space: pre-wrap;">{{ doubt.question }}</p>
+            </div>
+
+            {% if doubt.admin_reply %}
+            <div class="reply-box"
+                style="background: #f0fdf4; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981;">
+                <p style="margin: 0 0 5px 0; font-weight: 700; color: #065f46; font-size: 0.8rem;">YOUR REPLY • {{
+                    doubt.replied_at|date:"M d, h:i A" }}</p>
+                <p style="margin: 0;">{{ doubt.admin_reply }}</p>
+            </div>
+            {% endif %}
+
+            <div class="reply-box">
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="doubt_id" value="{{ doubt.id }}">
+                    <textarea name="admin_reply" class="form-textarea" placeholder="Type your response..." required
+                        rows="3"></textarea>
+                    <button type="submit" class="btn-reply">
+                        {% if doubt.admin_reply %}Update Reply{% else %}Send Reply{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% empty %}
+        <div style="text-align: center; padding: 60px; background: white; border-radius: 12px;">
+            <p style="color: #64748b;">No doubts submitted yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .manage-container {
+        padding: 40px 5%;
+    }
+
+    .message-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .message-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        border: 1px solid #edf2f7;
+    }
+
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .status-new {
+        background: #fee2e2;
+        color: #ef4444;
+    }
+
+    .status-replied {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+
+    .sender-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.9rem;
+        color: #64748b;
+    }
+
+    .content-box {
+        background: #f8f9fc;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #f87171;
+    }
+
+    .reply-box {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px dashed #e2e8f0;
+    }
+
+    .form-textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-family: inherit;
+        margin-bottom: 10px;
+    }
+
+    .btn-reply {
+        background: #33c1a8;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-reply:hover {
+        background: #2db099;
+    }
+</style>
+
+<div class="manage-container">
+    <h1>Parent Messages Inbox</h1>
+    <p style="color: #64748b; margin-bottom: 30px;">Direct communication with parents about student performance.</p>
+
+    <div class="message-list">
+        {% for msg in messages_list %}
+        <div class="message-card">
+            <div class="message-header">
+                <div>
+                    <h3 style="margin: 0 0 5px 0;">{{ msg.subject|default:"No Subject" }}</h3>
+                    <div class="sender-info">
+                        <strong>Parent: {{ msg.parent.get_full_name|default:msg.parent.username }}</strong>
+                        <span>•</span>
+                        <strong>Regarding Student: {{ msg.student.get_full_name|default:msg.student.username }}</strong>
+                        <span>•</span>
+                        <span>{{ msg.created_at|date:"M d, h:i A" }}</span>
+                    </div>
+                </div>
+                <span class="status-badge status-{{ msg.status }}">
+                    {{ msg.get_status_display }}
+                </span>
+            </div>
+
+            <div class="content-box">
+                <p style="margin: 0; white-space: pre-wrap;">{{ msg.message }}</p>
+            </div>
+
+            {% if msg.admin_reply %}
+            <div class="reply-box"
+                style="background: #f0fdf4; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981;">
+                <p style="margin: 0 0 5px 0; font-weight: 700; color: #065f46; font-size: 0.8rem;">YOUR REPLY • {{
+                    msg.replied_at|date:"M d, h:i A" }}</p>
+                <p style="margin: 0;">{{ msg.admin_reply }}</p>
+            </div>
+            {% endif %}
+
+            <div class="reply-box">
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="message_id" value="{{ msg.id }}">
+                    <textarea name="admin_reply" class="form-textarea" placeholder="Type your response to the parent..."
+                        required rows="3"></textarea>
+                    <button type="submit" class="btn-reply">
+                        {% if msg.admin_reply %}Update Reply{% else %}Send Reply{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% empty %}
+        <div style="text-align: center; padding: 60px; background: white; border-radius: 12px;">
+            <p style="color: #64748b;">No messages from parents yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .manage-container {
+        padding: 40px 5%;
+    }
+
+    .header-area {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .btn-add {
+        background: #33c1a8;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-add:hover {
+        background: #2db099;
+    }
+
+    .assignment-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 20px;
+    }
+
+    .assignment-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        border: 1px solid #edf2f7;
+        position: relative;
+    }
+
+    .assignment-card h3 {
+        margin-top: 0;
+        color: #1e293b;
+        font-size: 1.2rem;
+    }
+
+    .assignment-card p {
+        color: #64748b;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin: 15px 0;
+    }
+
+    .meta-info {
+        display: flex;
+        gap: 15px;
+        font-size: 0.85rem;
+        color: #94a3b8;
+        margin-bottom: 20px;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .card-actions {
+        border-top: 1px solid #f1f5f9;
+        padding-top: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        background: white;
+        margin: 10% auto;
+        padding: 30px;
+        width: 90%;
+        max-width: 550px;
+        border-radius: 12px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+
+    .form-input,
+    .form-textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-family: inherit;
+    }
+</style>
+
+<div class="manage-container">
+    <div class="header-area">
+        <div>
+            <h1>Assignments Management</h1>
+            <p style="color: #64748b;">Create and manage student assignments.</p>
+        </div>
+        <button class="btn-add" onclick="openModal()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Create Assignment
+        </button>
+    </div>
+
+    <div class="assignment-list">
+        {% for assignment in assignments %}
+        <div class="assignment-card">
+            <h3>{{ assignment.title }}</h3>
+            <p>{{ assignment.description|truncatewords:20 }}</p>
+
+            <div class="meta-info">
+                <div class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    Due: {{ assignment.due_date|date:"M d, h:i A" }}
+                </div>
+                <div class="meta-item">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    {{ assignment.submissions.count }} Submissions
+                </div>
+            </div>
+
+            <div class="card-actions">
+                <a href="#" style="color: #33c1a8; font-weight: 600; text-decoration: none; font-size: 0.9rem;">View
+                    Submissions</a>
+                <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this assignment?')">
+                    {% csrf_token %}
+                    <input type="hidden" name="assignment_id" value="{{ assignment.id }}">
+                    <button type="submit" name="delete_assignment"
+                        style="background:none; border:none; color: #ef4444; cursor:pointer; font-size: 0.9rem; font-weight: 600;">Delete</button>
+                </form>
+            </div>
+        </div>
+        {% empty %}
+        <div style="grid-column: 1/-1; text-align: center; padding: 60px; background: white; border-radius: 12px;">
+            <p style="color: #64748b;">No assignments created yet. Click the button above to start.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Create Modal -->
+<div id="createModal" class="modal">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <h2>Create Assignment</h2>
+            <span onclick="closeModal()" style="cursor: pointer; font-size: 1.5rem;">&times;</span>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="create_assignment" value="1">
+            {% for field in form %}
+            <div class="form-group">
+                <label>{{ field.label }}</label>
+                {{ field }}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn-add" style="width: 100%; justify-content: center; margin-top: 10px;">Create
+                Assignment</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openModal() { document.getElementById('createModal').style.display = 'block'; }
+    function closeModal() { document.getElementById('createModal').style.display = 'none'; }
+    window.onclick = function (event) {
+        if (event.target == document.getElementById('createModal')) { closeModal(); }
+    }
+</script>
+{% endblock %}

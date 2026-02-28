@@ -64,16 +64,18 @@
     <a href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'login' %}{% endif %}" class="logo"
       style="text-decoration: none; color: white;">Physics<span>Mentor</span></a>
 
-    {% if not request.user.is_authenticated %}
     <ul class="nav-links">
+      {% if request.path == '/' or not request.user.is_authenticated %}
       <li><a href="{% url 'home' %}">Home</a></li>
-      <li><a href="{% url 'courses' %}">Courses</a></li>
       <li><a href="{% url 'features' %}">Features</a></li>
       <li><a href="{% url 'testimonials' %}">Testimonials</a></li>
       <li><a href="{% url 'contact' %}">Contact</a></li>
       <li><a href="{% url 'aboutus' %}">About Us</a></li>
+      {% elif not request.user.is_staff and not request.user.is_superuser %}
+      <li><a href="{% url 'dashboard' %}">My Dashboard</a></li>
+      <li><a href="{% url 'courses' %}">Courses</a></li>
+      {% endif %}
     </ul>
-    {% endif %}
 
     <div class="nav-actions" {% if request.user.is_authenticated %}style="margin-left: auto;" {% endif %}>
       {% if request.user.is_authenticated %}

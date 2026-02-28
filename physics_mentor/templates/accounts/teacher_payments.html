@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .manage-container {
+        padding: 40px 5%;
+    }
+
+    .header-area {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .btn-add {
+        background: #33c1a8;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-add:hover {
+        background: #2db099;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    }
+
+    .data-table th {
+        background: #f8f9fc;
+        padding: 15px;
+        text-align: left;
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .data-table td {
+        padding: 15px;
+        border-top: 1px solid #edf2f7;
+    }
+
+    .badge-paid {
+        background: #d1fae5;
+        color: #065f46;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        background: white;
+        margin: 15% auto;
+        padding: 30px;
+        width: 90%;
+        max-width: 450px;
+        border-radius: 12px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+    }
+</style>
+
+<div class="manage-container">
+    <div class="header-area">
+        <div>
+            <h1>Payments & Subscriptions</h1>
+            <p style="color: #64748b;">Record manual payments and view transaction history.</p>
+        </div>
+        <button class="btn-add" onclick="openModal()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                <line x1="1" y1="10" x2="23" y2="10" />
+            </svg>
+            Record New Payment
+        </button>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Subscription Valid Until</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                <tr>
+                    <td>
+                        <div style="font-weight: 600;">{{ payment.student.get_full_name|default:payment.student.username
+                            }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b;">@{{ payment.student.username }}</div>
+                    </td>
+                    <td style="font-weight: 600;">₹{{ payment.amount }}</td>
+                    <td><span class="badge-paid">{{ payment.status|title }}</span></td>
+                    <td>{{ payment.payment_date|date:"M d, Y" }}</td>
+                    <td><strong style="color: #33c1a8;">{{ payment.expiry_date_after_payment|date:"M d, Y"|default:"-"
+                            }}</strong></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #64748b; padding: 40px;">No payment records found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create Modal -->
+<div id="createModal" class="modal">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <h2>Record Payment</h2>
+            <span onclick="closeModal()" style="cursor: pointer; font-size: 1.5rem;">&times;</span>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label>{{ field.label }}</label>
+                {{ field }}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn-add" style="width: 100%; justify-content: center; margin-top: 10px;">Save
+                Payment</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openModal() {
+        document.getElementById('createModal').style.display = 'block';
+        // Auto-select student if provided in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentId = urlParams.get('student');
+        if (studentId) {
+            const select = document.querySelector('select[name="student"]');
+            if (select) select.value = studentId;
+        }
+    }
+    function closeModal() { document.getElementById('createModal').style.display = 'none'; }
+
+    // Auto-open modal if student ID is in URL
+    if (new URLSearchParams(window.location.search).get('student')) {
+        openModal();
+    }
+</script>
+{% endblock %}

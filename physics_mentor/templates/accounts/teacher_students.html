@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .manage-container {
+        padding: 40px 5%;
+    }
+
+    .header-area {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .btn-add {
+        background: #33c1a8;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-add:hover {
+        background: #2db099;
+    }
+
+    .search-bar {
+        margin-bottom: 30px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .search-input {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    }
+
+    .data-table th {
+        background: #f8f9fc;
+        padding: 15px;
+        text-align: left;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .data-table td {
+        padding: 15px;
+        border-top: 1px solid #edf2f7;
+        vertical-align: middle;
+    }
+
+    .badge-role {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .role-student {
+        background: #e0f2fe;
+        color: #0ea5e9;
+    }
+
+    .role-paid {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .role-unpaid {
+        background: #fee2e2;
+        color: #ef4444;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        background: white;
+        margin: 5% auto;
+        padding: 30px;
+        width: 90%;
+        max-width: 500px;
+        border-radius: 12px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+    }
+
+    .tabs {
+        display: flex;
+        gap: 20px;
+        border-bottom: 1px solid #e2e8f0;
+        margin-bottom: 20px;
+    }
+
+    .tab {
+        padding: 10px 0;
+        cursor: pointer;
+        color: #64748b;
+        font-weight: 500;
+        border-bottom: 2px solid transparent;
+    }
+
+    .tab.active {
+        color: #33c1a8;
+        border-bottom-color: #33c1a8;
+    }
+</style>
+
+<div class="manage-container">
+    <div class="header-area">
+        <h1>Student & Parent Management</h1>
+        <button class="btn-add" onclick="openModal()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add New Account
+        </button>
+    </div>
+
+    <form method="GET" class="search-bar">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search by username..." class="search-input">
+        <button type="submit" class="btn-add">Search</button>
+    </form>
+
+    <div style="overflow-x: auto;">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Class</th>
+                    <th>Status</th>
+                    <th>Sub End Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for profile in students %}
+                <tr>
+                    <td>
+                        <div style="font-weight: 600;">{{ profile.user.get_full_name|default:profile.user.username }}
+                        </div>
+                        <div style="font-size: 0.8rem; color: #64748b;">@{{ profile.user.username }}</div>
+                    </td>
+                    <td>{{ profile.user.email }}</td>
+                    <td>{{ profile.student_class|default:"-" }}</td>
+                    <td>
+                        {% if profile.is_paid %}
+                        <span class="badge-role role-paid">Active</span>
+                        {% else %}
+                        <span class="badge-role role-unpaid">Unpaid</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ profile.subscription_end_date|date:"M d, Y"|default:"-" }}</td>
+                    <td>
+                        <a href="{% url 'student_performance' profile.user.id %}"
+                            style="color: #3b82f6; font-size: 0.85rem; font-weight: 600; text-decoration: none; margin-right: 15px;">View
+                            Performance</a>
+                        <a href="{% url 'teacher_payments' %}?student={{ profile.user.id }}"
+                            style="color: #33c1a8; font-size: 0.85rem; font-weight: 600; text-decoration: none;">Record
+                            Payment</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: #64748b; padding: 40px;">No students found
+                        matching your search.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal for adding accounts -->
+<div id="accountModal" class="modal">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 id="modalTitle">Create New Account</h2>
+            <span onclick="closeModal()" style="cursor: pointer; font-size: 1.5rem;">&times;</span>
+        </div>
+
+        <div class="tabs">
+            <div id="tab-student" class="tab active" onclick="switchTab('student')">Student Account</div>
+            <div id="tab-parent" class="tab" onclick="switchTab('parent')">Parent Account</div>
+        </div>
+
+        <!-- Student Form -->
+        <form id="form-student" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="add_student" value="1">
+            {% for field in student_form %}
+            <div class="form-group">
+                <label>{{ field.label|default:field.name|title }}</label>
+                {{ field }}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn-add" style="width: 100%; justify-content: center;">Create Student
+                Account</button>
+        </form>
+
+        <!-- Parent Form -->
+        <form id="form-parent" method="POST" style="display: none;">
+            {% csrf_token %}
+            <input type="hidden" name="add_parent" value="1">
+            {% for field in parent_form %}
+            <div class="form-group">
+                <label>{{ field.label|default:field.name|title }}</label>
+                {{ field }}
+            </div>
+            {% endfor %}
+            <button type="submit" class="btn-add" style="width: 100%; justify-content: center;">Create Parent &
+                Link</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openModal() {
+        document.getElementById('accountModal').style.display = 'block';
+    }
+    function closeModal() {
+        document.getElementById('accountModal').style.display = 'none';
+    }
+    function switchTab(type) {
+        if (type === 'student') {
+            document.getElementById('tab-student').classList.add('active');
+            document.getElementById('tab-parent').classList.remove('active');
+            document.getElementById('form-student').style.display = 'block';
+            document.getElementById('form-parent').style.display = 'none';
+        } else {
+            document.getElementById('tab-parent').classList.add('active');
+            document.getElementById('tab-student').classList.remove('active');
+            document.getElementById('form-parent').style.display = 'block';
+            document.getElementById('form-student').style.display = 'none';
+        }
+    }
+    // Close modal when clicking outside
+    window.onclick = function (event) {
+        if (event.target == document.getElementById('accountModal')) {
+            closeModal();
+        }
+    }
+</script>
+{% endblock %}

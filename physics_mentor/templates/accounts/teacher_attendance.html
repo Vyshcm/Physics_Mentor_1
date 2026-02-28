@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .manage-container {
+        padding: 40px 5%;
+    }
+
+    .header-area {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .btn-save {
+        background: #33c1a8;
+        color: white;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-save:hover {
+        background: #2db099;
+    }
+
+    .date-selector {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 30px;
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    }
+
+    .date-input {
+        padding: 8px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+    }
+
+    .attendance-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    }
+
+    .attendance-table th {
+        background: #f8f9fc;
+        padding: 15px;
+        text-align: left;
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .attendance-table td {
+        padding: 15px;
+        border-top: 1px solid #edf2f7;
+    }
+
+    .radio-group {
+        display: flex;
+        gap: 15px;
+    }
+
+    .radio-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .radio-label input {
+        cursor: pointer;
+        width: 18px;
+        height: 18px;
+    }
+
+    .text-present {
+        color: #10b981;
+    }
+
+    .text-absent {
+        color: #ef4444;
+    }
+</style>
+
+<div class="manage-container">
+    <div class="header-area">
+        <h1>Mark Attendance</h1>
+        <p style="color: #64748b;">Daily presence tracking for all students.</p>
+    </div>
+
+    <div class="date-selector">
+        <label style="font-weight: 600;">Select Date:</label>
+        <form method="GET" id="dateForm" style="display: flex; gap: 10px;">
+            <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" class="date-input"
+                onchange="document.getElementById('dateForm').submit()">
+        </form>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div style="overflow-x: auto;">
+            <table class="attendance-table">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Username</th>
+                        <th>Class</th>
+                        <th>Attendance Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profile in students %}
+                    <tr>
+                        <td style="font-weight: 600;">{{ profile.user.get_full_name|default:profile.user.username }}
+                        </td>
+                        <td style="color: #64748b;">@{{ profile.user.username }}</td>
+                        <td>{{ profile.student_class|default:"-" }}</td>
+                        <td>
+                            <div class="radio-group">
+                                {% with current_status=attendance_dict|get_item:profile.user.id %}
+                                <label class="radio-label text-present">
+                                    <input type="radio" name="attendance_{{ profile.user.id }}" value="Present" {% if
+                                        current_status=="Present" %}checked{% endif %} required>
+                                    Present
+                                </label>
+                                <label class="radio-label text-absent">
+                                    <input type="radio" name="attendance_{{ profile.user.id }}" value="Absent" {% if
+                                        current_status=="Absent" %}checked{% endif %}>
+                                    Absent
+                                </label>
+                                {% endwith %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #64748b; padding: 40px;">No students found to
+                            mark attendance.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: 30px; display: flex; justify-content: flex-end;">
+            <button type="submit" class="btn-save">Save Attendance Records</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
