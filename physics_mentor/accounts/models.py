@@ -202,13 +202,45 @@ class Note(models.Model):
         return self.title
 
 class LiveClass(models.Model):
+    STATUS_CHOICES = [
+        ('UPCOMING', 'Upcoming'),
+        ('COMPLETED', 'Completed'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+    AUDIENCE_CHOICES = [
+        ('ALL', 'All Students'),
+        ('CLASS', 'Specific Class'),
+        ('STUDENTS', 'Specific Students'),
+    ]
+
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     date = models.DateField()
     time = models.TimeField()
+    duration = models.IntegerField(help_text="Duration in minutes", null=True, blank=True)
     meeting_link = models.URLField()
+    
+    audience_type = models.CharField(max_length=20, choices=AUDIENCE_CHOICES, default='ALL')
+    student_class = models.CharField(max_length=20, blank=True, null=True, help_text="Target class if Audience is 'Specific Class'")
+    specific_students = models.ManyToManyField(User, blank=True, related_name='assigned_live_classes')
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='UPCOMING')
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_live_classes')
 
     def __str__(self):
         return f"{self.title} - {self.date}"
+
+    @property
+    def effective_status(self):
+        if self.status == 'CANCELLED':
+            return 'CANCELLED'
+        
+        from django.utils import timezone
+        now = timezone.now()
+        class_datetime = timezone.make_aware(timezone.datetime.combine(self.date, self.time))
+        
+        if now > class_datetime:
+             # Check if it was today but time passed
+             return 'COMPLETED'
+        return 'UPCOMING'

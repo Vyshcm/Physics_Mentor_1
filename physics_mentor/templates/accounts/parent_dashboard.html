@@ -353,7 +353,39 @@
         {% endif %}
     </div>
 
-    <!-- Card 5: Study Materials -->
+    <!-- Card 5: Live Sessions -->
+    <div class="card">
+        <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            Upcoming Live Sessions
+        </h3>
+        <div style="max-height: 250px; overflow-y: auto;">
+            {% for cls in live_classes %}
+            <div
+                style="padding: 12px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #8b5cf6;">
+                <div>
+                    <div style="font-weight: 700; font-size: 0.95rem; color: var(--dark-blue);">{{ cls.title }}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">{{ cls.date|date:"d M" }} at {{
+                        cls.time|time:"H:i" }}</div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                    <span
+                        style="font-size: 0.7rem; color: #8b5cf6; font-weight: 700; margin-bottom: 4px;">UPCOMING</span>
+                    <a href="{{ cls.meeting_link }}" target="_blank"
+                        style="color: #4f46e5; font-weight: 700; font-size: 0.8rem; text-decoration: none;">Link</a>
+                </div>
+            </div>
+            {% empty %}
+            <p class="empty-state">No upcoming live sessions yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Card 6: Study Materials -->
     <div class="card">
         <h3 class="card-title">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

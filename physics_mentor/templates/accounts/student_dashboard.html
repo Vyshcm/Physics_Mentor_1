@@ -351,7 +351,7 @@
         </div>
         <h3>Unlock Full Access</h3>
         <p>Subscribe to access live classes, notes, assignments, quizzes and more.</p>
-        <button onclick="window.location.href='{% url 'payment' %}'" class="btn-subscribe-dark">
+        <button onclick="window.location.href='{% url 'payment' %}';" class="btn-subscribe-dark">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
                 <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
@@ -387,7 +387,7 @@
                     {% endif %}
                 </div>
                 {% empty %}
-                <p style="font-size: 0.85rem; color: #94a3b8;">No live classes scheduled.</p>
+                <p style="font-size: 0.85rem; color: #94a3b8; font-style: italic;">No live classes scheduled yet.</p>
                 {% endfor %}
             </div>
         </div>

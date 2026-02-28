@@ -85,7 +85,15 @@ def dashboard(request):
         attendance_pct = round((attendances.filter(status='Present').count() / total_days * 100), 1) if total_days > 0 else None
         
         # Fetch Live Classes & Notes
-        live_classes = LiveClass.objects.filter(date__gte=timezone.now().date()).order_by('date', 'time')
+        # Show classes for: (All) OR (their class) OR (specifically assigned to them)
+        # AND status must be UPCOMING
+        live_classes = LiveClass.objects.filter(
+            models.Q(audience_type='ALL') | 
+            models.Q(audience_type='CLASS', student_class=profile.student_class) |
+            models.Q(audience_type='STUDENTS', specific_students=request.user),
+            status='UPCOMING',
+            date__gte=timezone.now().date()
+        ).distinct().order_by('date', 'time')
         # Notes for student: (All) OR (their class) OR (specifically assigned to them)
         notes = Note.objects.filter(
             models.Q(student_class=profile.student_class) | 
@@ -335,7 +343,16 @@ def parent_dashboard_view(request):
         models.Q(assigned_student=student)
     ).distinct().order_by('-created_at')
 
-    # 7. Messaging Logic
+    # 8. Upcoming Live Classes for student
+    live_classes = LiveClass.objects.filter(
+        models.Q(audience_type='ALL') | 
+        models.Q(audience_type='CLASS', student_class=student_profile.student_class) |
+        models.Q(audience_type='STUDENTS', specific_students=student),
+        status='UPCOMING',
+        date__gte=timezone.now().date()
+    ).distinct().order_by('date', 'time')
+
+    # 9. Messaging Logic
     if request.method == "POST" and "message_submit" in request.POST:
         msg_text = request.POST.get('message', '').strip()
         subject = request.POST.get('subject', '').strip()
@@ -365,6 +382,7 @@ def parent_dashboard_view(request):
         'payment_history': payment_history,
         'messages_list': messages_list,
         'notes': notes,
+        'live_classes': live_classes,
     }
     
     return render(request, 'accounts/parent_dashboard.html', context)
@@ -848,8 +866,15 @@ def teacher_live_classes_view(request):
                 live_class = form.save(commit=False)
                 live_class.created_by = request.user
                 live_class.save()
+                # Must save M2M after save()
+                form.save_m2m()
                 messages.success(request, "Live class scheduled successfully.")
                 return redirect('teacher_live_classes')
+        elif "cancel_class" in request.POST:
+            class_id = request.POST.get('class_id')
+            LiveClass.objects.filter(id=class_id).update(status='CANCELLED')
+            messages.success(request, "Live class cancelled.")
+            return redirect('teacher_live_classes')
         elif "delete_class" in request.POST:
             class_id = request.POST.get('class_id')
             LiveClass.objects.filter(id=class_id).delete()

@@ -198,11 +198,29 @@ class NoteForm(forms.ModelForm):
 class LiveClassCreationForm(forms.ModelForm):
     class Meta:
         model = LiveClass
-        fields = ['title', 'description', 'date', 'time', 'meeting_link']
+        fields = ['title', 'description', 'date', 'time', 'duration', 'meeting_link', 'audience_type', 'student_class', 'specific_students']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Class Title'}),
             'description': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Description...', 'rows': 3}),
             'date': forms.DateInput(attrs={'class': 'form-input', 'type': 'date'}),
             'time': forms.TimeInput(attrs={'class': 'form-input', 'type': 'time'}),
+            'duration': forms.NumberInput(attrs={'class': 'form-input', 'placeholder': 'Duration (mins)'}),
             'meeting_link': forms.URLInput(attrs={'class': 'form-input', 'placeholder': 'https://zoom.us/j/...'}),
+            'audience_type': forms.Select(attrs={'class': 'form-input', 'id': 'id_audience_type'}),
+            'student_class': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. 10th', 'id': 'id_student_class_input'}),
+            'specific_students': forms.SelectMultiple(attrs={'class': 'form-input', 'id': 'id_specific_students_input'}),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        audience_type = cleaned_data.get('audience_type')
+        student_class = cleaned_data.get('student_class')
+        specific_students = cleaned_data.get('specific_students')
+
+        if audience_type == 'CLASS' and not student_class:
+            self.add_error('student_class', "Please specify the target class.")
+        
+        if audience_type == 'STUDENTS' and not specific_students:
+            self.add_error('specific_students', "Please select at least one student.")
+            
+        return cleaned_data
