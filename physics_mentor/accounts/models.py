@@ -102,6 +102,9 @@ class Attendance(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='attendances')
     date = models.DateField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    remarks = models.TextField(blank=True, null=True)
+    marked_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='marked_attendances')
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('student', 'date')
@@ -186,5 +189,26 @@ class AssignmentSubmission(models.Model):
     submitted_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Submitted')
 
+class Note(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    file = models.FileField(upload_to='notes/')
+    student_class = models.CharField(max_length=20, blank=True, null=True, help_text="Target class (Optional)")
+    assigned_student = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='personal_notes', help_text="Target specific student (Optional)")
+    created_at = models.DateTimeField(auto_now_add=True)
+    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='uploaded_notes')
+
     def __str__(self):
-        return f"{self.student.username} - {self.assignment.title} ({self.status})"
+        return self.title
+
+class LiveClass(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    date = models.DateField()
+    time = models.TimeField()
+    meeting_link = models.URLField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='created_live_classes')
+
+    def __str__(self):
+        return f"{self.title} - {self.date}"

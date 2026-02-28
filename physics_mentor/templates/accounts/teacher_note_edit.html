@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .manage-container {
+        padding: 40px 5%;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .header-area {
+        background: linear-gradient(135deg, #0f1c3f 0%, #1e4d58 100%);
+        padding: 30px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        color: white;
+    }
+
+    .edit-card {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.9rem;
+    }
+
+    .form-input,
+    .form-textarea,
+    select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        background: #f8fafc;
+        transition: border-color 0.2s;
+    }
+
+    .btn-save {
+        background: #3b82f6;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-cancel {
+        color: #64748b;
+        text-decoration: none;
+        font-weight: 600;
+        margin-left: 15px;
+    }
+</style>
+
+<div class="manage-container">
+    <div class="header-area">
+        <h1 style="margin:0; font-size: 1.5rem;">Edit Note</h1>
+        <p style="margin:5px 0 0 0; opacity: 0.8;">Updating: {{ note.title }}</p>
+    </div>
+
+    <div class="edit-card">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Title</label>
+                {{ form.title }}
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="form-group">
+                    <label>Target Class (Optional)</label>
+                    {{ form.student_class }}
+                </div>
+                <div class="form-group">
+                    <label>Specific Student (Optional)</label>
+                    {{ form.assigned_student }}
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                {{ form.description }}
+            </div>
+            <div class="form-group">
+                <label>Update File (Optional)</label>
+                <div style="margin-bottom: 10px; font-size: 0.85rem; color: #64748b;">
+                    Current: {{ note.file.name|cut:"notes/" }}
+                </div>
+                {{ form.file }}
+                {% if form.file.errors %}
+                <div style="color: #ef4444; font-size: 0.8rem; margin-top: 5px;">{{ form.file.errors }}</div>
+                {% endif %}
+            </div>
+            <div style="margin-top: 30px; display: flex; align-items: center;">
+                <button type="submit" class="btn-save">Save Changes</button>
+                <a href="{% url 'teacher_notes' %}" class="btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

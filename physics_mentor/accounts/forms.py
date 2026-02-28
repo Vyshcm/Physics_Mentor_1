@@ -1,7 +1,9 @@
 from django.contrib.auth.forms import UserCreationForm,AuthenticationForm,PasswordResetForm
 from django.contrib.auth.models import User
 from django import forms
-from .models import UserProfile, Feedback, Doubt, Assignment, Quiz, Payment, Exam, Question
+from .models import UserProfile, Feedback, Doubt, Assignment, Quiz, Payment, Exam, Question, Note, LiveClass
+
+
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
 
@@ -167,3 +169,40 @@ class ExamCreationForm(forms.ModelForm):
 
 class AdminReplyForm(forms.Form):
     admin_reply = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Write your reply here...', 'rows': 4}))
+
+class NoteForm(forms.ModelForm):
+    assigned_student = forms.ModelChoiceField(
+        queryset=User.objects.filter(userprofile__role='Student'),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-input'}),
+        label="Specific Student (Optional)"
+    )
+
+    class Meta:
+        model = Note
+        fields = ['title', 'description', 'file', 'student_class', 'assigned_student']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Note Title'}),
+            'description': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Description...', 'rows': 3}),
+            'file': forms.ClearableFileInput(attrs={'class': 'form-input'}),
+            'student_class': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Target Class (e.g. 10th)'}),
+        }
+
+    def clean_file(self):
+        file = self.cleaned_data.get('file')
+        if file:
+            if file.size > 10 * 1024 * 1024:  # 10MB
+                raise ValidationError("File size must be under 10MB.")
+        return file
+
+class LiveClassCreationForm(forms.ModelForm):
+    class Meta:
+        model = LiveClass
+        fields = ['title', 'description', 'date', 'time', 'meeting_link']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Class Title'}),
+            'description': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Description...', 'rows': 3}),
+            'date': forms.DateInput(attrs={'class': 'form-input', 'type': 'date'}),
+            'time': forms.TimeInput(attrs={'class': 'form-input', 'type': 'time'}),
+            'meeting_link': forms.URLInput(attrs={'class': 'form-input', 'placeholder': 'https://zoom.us/j/...'}),
+        }

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load accounts_extras %}
 
 {% block content %}
 <style>
@@ -12,6 +13,36 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 30px;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        border: 1px solid #edf2f7;
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #33c1a8;
+        display: block;
+    }
+
+    .stat-label {
+        color: #334155;
+        font-size: 0.875rem;
+        margin-top: 5px;
+        font-weight: 500;
     }
 
     .btn-save {
@@ -28,6 +59,22 @@
         background: #2db099;
     }
 
+    .btn-outline {
+        background: transparent;
+        border: 1px solid #33c1a8;
+        color: #33c1a8;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-right: 10px;
+    }
+
+    .btn-outline:hover {
+        background: #f0fdfa;
+    }
+
     .date-selector {
         display: flex;
         align-items: center;
@@ -41,8 +88,9 @@
 
     .date-input {
         padding: 8px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid #cbd5e1;
         border-radius: 6px;
+        color: #1e293b;
     }
 
     .attendance-table {
@@ -55,11 +103,11 @@
     }
 
     .attendance-table th {
-        background: #f8f9fc;
+        background: #f1f5f9;
         padding: 15px;
         text-align: left;
-        color: #64748b;
-        font-weight: 600;
+        color: #1e293b;
+        font-weight: 700;
     }
 
     .attendance-table td {
@@ -77,7 +125,7 @@
         align-items: center;
         gap: 6px;
         cursor: pointer;
-        font-weight: 500;
+        font-weight: 600;
     }
 
     .radio-label input {
@@ -86,27 +134,92 @@
         height: 18px;
     }
 
-    .text-present {
-        color: #10b981;
+    .remarks-input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        color: #1e293b;
+        font-weight: 500;
+    }
+    .remarks-input::placeholder {
+        color: #94a3b8;
     }
 
-    .text-absent {
-        color: #ef4444;
+    .messages {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 20px;
+    }
+    .message {
+        padding: 12px 20px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        font-weight: 500;
+    }
+    .message.success {
+        background: #f0fdf4;
+        color: #166534;
+        border: 1px solid #bbf7d0;
     }
 </style>
 
 <div class="manage-container">
     <div class="header-area">
-        <h1>Mark Attendance</h1>
-        <p style="color: #64748b;">Daily presence tracking for all students.</p>
+        <div>
+            <h1 style="color: #ffffff; font-weight: 700; margin-bottom: 5px;">Attendance Management</h1>
+            <p style="color: #cbd5e1; font-weight: 500;">Mark and track student presence.</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <a href="{% url 'teacher_attendance_history' %}" class="btn-outline" style="text-decoration: none; line-height: 1.5; padding: 10px 24px;">View History</a>
+            <a href="{% url 'teacher_student_attendance_report' %}" class="btn-save" style="text-decoration: none; background: #6366f1;">Student Reports</a>
+        </div>
+    </div>
+
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li class="message {{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-value">{{ selected_date|date:"d M, Y" }}</span>
+            <span class="stat-label">Selected Date</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value">{{ total_students }}</span>
+            <span class="stat-label">Total Students</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" style="color: #10b981;">{{ present_today }}</span>
+            <span class="stat-label">Present {% if selected_date == today %}Today{% else %}on {{ selected_date|date:"d M" }}{% endif %}</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" style="color: #ef4444;">{{ absent_today }}</span>
+            <span class="stat-label">Absent {% if selected_date == today %}Today{% else %}on {{ selected_date|date:"d M" }}{% endif %}</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" style="color: #6366f1;">{{ overall_pct }}%</span>
+            <span class="stat-label">Overall Attendance</span>
+        </div>
     </div>
 
     <div class="date-selector">
-        <label style="font-weight: 600;">Select Date:</label>
+        <label style="font-weight: 700; color: #1e293b;">Attendance Date:</label>
         <form method="GET" id="dateForm" style="display: flex; gap: 10px;">
-            <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" class="date-input"
-                onchange="document.getElementById('dateForm').submit()">
+            <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" class="date-input" onchange="document.getElementById('dateForm').submit()">
+            {% if selected_date != today %}
+            <a href="{% url 'teacher_attendance' %}" style="color: #33c1a8; text-decoration: none; align-self: center; font-size: 0.875rem;">Reset to Today</a>
+            {% endif %}
         </form>
+        <div style="margin-left: auto;">
+            <button type="button" class="btn-outline" onclick="markAll('Present')">Mark All Present</button>
+            <button type="button" class="btn-outline" onclick="markAll('Absent')" style="border-color: #ef4444; color: #ef4444;">Mark All Absent</button>
+        </div>
     </div>
 
     <form method="POST">
@@ -116,48 +229,59 @@
                 <thead>
                     <tr>
                         <th>Student Name</th>
-                        <th>Username</th>
                         <th>Class</th>
-                        <th>Attendance Status</th>
+                        <th>Status</th>
+                        <th>Remarks</th>
+                        <th>Report</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for profile in students %}
+                    {% with current_data=attendance_dict|get_item:profile.user.id %}
                     <tr>
-                        <td style="font-weight: 600;">{{ profile.user.get_full_name|default:profile.user.username }}
+                        <td style="font-weight: 700; color: #0f172a;">
+                            {{ profile.user.get_full_name|default:profile.user.username }}
+                            <div style="font-size: 0.8rem; color: #1e293b; font-weight: 600; margin-top: 2px;">@{{ profile.user.username }}</div>
                         </td>
-                        <td style="color: #64748b;">@{{ profile.user.username }}</td>
-                        <td>{{ profile.student_class|default:"-" }}</td>
+                        <td style="color: #334155; font-weight: 500;">{{ profile.student_class|default:"-" }}</td>
                         <td>
                             <div class="radio-group">
-                                {% with current_status=attendance_dict|get_item:profile.user.id %}
-                                <label class="radio-label text-present">
-                                    <input type="radio" name="attendance_{{ profile.user.id }}" value="Present" {% if
-                                        current_status=="Present" %}checked{% endif %} required>
-                                    Present
+                                <label class="radio-label" style="color: #059669;">
+                                    <input type="radio" name="attendance_{{ profile.user.id }}" value="Present" {% if current_data.status == "Present" %}checked{% endif %} required> Present
                                 </label>
-                                <label class="radio-label text-absent">
-                                    <input type="radio" name="attendance_{{ profile.user.id }}" value="Absent" {% if
-                                        current_status=="Absent" %}checked{% endif %}>
-                                    Absent
+                                <label class="radio-label" style="color: #dc2626;">
+                                    <input type="radio" name="attendance_{{ profile.user.id }}" value="Absent" {% if current_data.status == "Absent" %}checked{% endif %}> Absent
                                 </label>
-                                {% endwith %}
                             </div>
                         </td>
+                        <td>
+                            <input type="text" name="remarks_{{ profile.user.id }}" value="{{ current_data.remarks|default:'' }}" class="remarks-input" placeholder="Optional notes...">
+                        </td>
+                        <td>
+                            <a href="{% url 'teacher_student_attendance_report_detail' student_id=profile.user.id %}" style="color: #3730a3; text-decoration: none; font-weight: 700; font-size: 0.85rem; border-bottom: 1px solid #a5b4fc;">View Report</a>
+                        </td>
                     </tr>
+                    {% endwith %}
                     {% empty %}
-                    <tr>
-                        <td colspan="4" style="text-align: center; color: #64748b; padding: 40px;">No students found to
-                            mark attendance.</td>
-                    </tr>
+                    <tr><td colspan="5" style="text-align: center; padding: 40px; color: #1e293b; font-weight: 600;">No students found.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
 
-        <div style="margin-top: 30px; display: flex; justify-content: flex-end;">
-            <button type="submit" class="btn-save">Save Attendance Records</button>
+        <div style="margin-top: 30px; display: flex; justify-content: flex-end; gap: 15px; align-items: center;">
+            <p style="color: #1e293b; font-size: 0.875rem; font-weight: 500;">Changes will be reflected immediately.</p>
+            <button type="submit" class="btn-save">Save Attendance Changes</button>
         </div>
     </form>
 </div>
+
+<script>
+    function markAll(status) {
+        document.querySelectorAll('input[type="radio"][value="' + status + '"]').forEach(r => {
+            r.checked = true;
+            r.dispatchEvent(new Event('change'));
+        });
+    }
+</script>
 {% endblock %}

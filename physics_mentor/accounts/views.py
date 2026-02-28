@@ -1,11 +1,14 @@
 from django.shortcuts import render,redirect
+from django.utils import timezone
+from datetime import timedelta
+from django.db import models
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import SignupForm,LoginForm,ForgotPasswordForm,FeedbackForm,DoubtForm
 from django.contrib import messages
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.models import User
-from .models import UserProfile, Feedback, Doubt, ParentProfile, ParentMessage, Payment, Attendance, Quiz, QuizResult, Exam, ExamResult, Assignment, AssignmentSubmission, Question
+from .models import UserProfile, Feedback, Doubt, ParentProfile, ParentMessage, Payment, Attendance, Quiz, QuizResult, Exam, ExamResult, Assignment, AssignmentSubmission, Question, Note, LiveClass
 
 from django.db import IntegrityError
 
@@ -76,7 +79,26 @@ def dashboard(request):
     elif profile.role == 'Parent':
         return redirect('parent_dashboard')
     else: # Student
-        return render(request, 'accounts/student_dashboard.html', {'is_paid': profile.is_paid})
+        # Calculate attendance %
+        attendances = Attendance.objects.filter(student=request.user)
+        total_days = attendances.count()
+        attendance_pct = round((attendances.filter(status='Present').count() / total_days * 100), 1) if total_days > 0 else None
+        
+        # Fetch Live Classes & Notes
+        live_classes = LiveClass.objects.filter(date__gte=timezone.now().date()).order_by('date', 'time')
+        # Notes for student: (All) OR (their class) OR (specifically assigned to them)
+        notes = Note.objects.filter(
+            models.Q(student_class=profile.student_class) | 
+            models.Q(student_class__in=['', None]) |
+            models.Q(assigned_student=request.user)
+        ).distinct().order_by('-created_at')
+
+        return render(request, 'accounts/student_dashboard.html', {
+            'is_paid': profile.is_paid,
+            'attendance_pct': attendance_pct,
+            'live_classes': live_classes,
+            'notes': notes
+        })
 
 def logout(request):
     # Consume existing messages to clear them before redirecting
@@ -210,8 +232,6 @@ def parent_dashboard_view(request):
     student_profile = student.userprofile
     
     # 1. Payment Status Logic from real Payment history
-    from django.utils import timezone
-    from datetime import timedelta
     today = timezone.now().date()
     
     # 1. Check real Payment history (Priority)
@@ -308,7 +328,14 @@ def parent_dashboard_view(request):
         # But we'll just use the objects as is.
         pass
     
-    # 6. Messaging Logic
+    # 6. Notes for student
+    notes = Note.objects.filter(
+        models.Q(student_class=student_profile.student_class) | 
+        models.Q(student_class__in=['', None]) |
+        models.Q(assigned_student=student)
+    ).distinct().order_by('-created_at')
+
+    # 7. Messaging Logic
     if request.method == "POST" and "message_submit" in request.POST:
         msg_text = request.POST.get('message', '').strip()
         subject = request.POST.get('subject', '').strip()
@@ -337,6 +364,7 @@ def parent_dashboard_view(request):
         'assignments': assignments,
         'payment_history': payment_history,
         'messages_list': messages_list,
+        'notes': notes,
     }
     
     return render(request, 'accounts/parent_dashboard.html', context)
@@ -442,31 +470,55 @@ def teacher_students_view(request):
 @teacher_required
 def teacher_attendance_view(request):
     from django.utils import timezone
+    from django.db.models import Count, Q
+    
     date_str = request.GET.get('date', timezone.now().date().isoformat())
     selected_date = timezone.datetime.strptime(date_str, '%Y-%m-%d').date()
+    today = timezone.now().date()
 
     if request.method == "POST":
         # Process attendance marking
         students = UserProfile.objects.filter(role='Student')
         for profile in students:
             status = request.POST.get(f'attendance_{profile.user.id}')
+            remarks = request.POST.get(f'remarks_{profile.user.id}', '')
             if status:
                 Attendance.objects.update_or_create(
                     student=profile.user,
                     date=selected_date,
-                    defaults={'status': status}
+                    defaults={
+                        'status': status,
+                        'remarks': remarks,
+                        'marked_by': request.user
+                    }
                 )
         messages.success(request, f"Attendance for {selected_date} updated successfully.")
         return redirect(f"{request.path}?date={date_str}")
 
     students = UserProfile.objects.filter(role='Student').select_related('user')
     attendance_records = Attendance.objects.filter(date=selected_date)
-    attendance_dict = {a.student_id: a.status for a in attendance_records}
+    attendance_dict = {a.student_id: {'status': a.status, 'remarks': a.remarks} for a in attendance_records}
+
+    # Summary Stats for Today (or selected date)
+    total_students = students.count()
+    present_today = attendance_records.filter(status='Present').count()
+    absent_today = attendance_records.filter(status='Absent').count()
+    
+    # Calculate Overall Attendance % (total across all time)
+    all_attendance = Attendance.objects.all()
+    total_records = all_attendance.count()
+    total_present = all_attendance.filter(status='Present').count()
+    overall_pct = round((total_present / total_records * 100), 1) if total_records > 0 else 0
 
     return render(request, 'accounts/teacher_attendance.html', {
         'students': students,
         'selected_date': selected_date,
+        'today': today,
         'attendance_dict': attendance_dict,
+        'total_students': total_students,
+        'present_today': present_today,
+        'absent_today': absent_today,
+        'overall_pct': overall_pct,
     })
 
 @teacher_required
@@ -669,3 +721,140 @@ def teacher_quiz_toggle_publish(request, quiz_id):
     status = "Published" if quiz.is_published else "Unpublished"
     messages.success(request, f"Quiz {quiz.title} is now {status}.")
     return redirect("teacher_quizzes")
+
+@teacher_required
+def teacher_attendance_history_view(request):
+    from django.db.models import Count, Q
+    
+    # Get all dates where attendance was marked, with summary counts
+    history = Attendance.objects.values('date').annotate(
+        total=Count('id'),
+        present=Count('id', filter=Q(status='Present')),
+        absent=Count('id', filter=Q(status='Absent'))
+    ).order_by('-date')
+    
+    return render(request, 'accounts/teacher_attendance_history.html', {
+        'history': history,
+    })
+
+@teacher_required
+def teacher_student_attendance_report_view(request, student_id=None):
+    from django.db.models import Count, Q
+    
+    students = UserProfile.objects.filter(role='Student').select_related('user')
+    selected_student = None
+    stats = None
+    records = None
+    
+    if student_id:
+        selected_student = User.objects.get(id=student_id)
+    elif request.GET.get('student_id'):
+        selected_student = User.objects.get(id=request.GET.get('student_id'))
+        
+    if selected_student:
+        records = Attendance.objects.filter(student=selected_student).order_by('-date')
+        total_days = records.count()
+        present_count = records.filter(status='Present').count()
+        absent_count = records.filter(status='Absent').count()
+        percentage = round((present_count / total_days * 100), 1) if total_days > 0 else 0
+        
+        stats = {
+            'total': total_days,
+            'present': present_count,
+            'absent': absent_count,
+            'percentage': percentage,
+        }
+        # Last 10 records
+        records = records[:10]
+
+    return render(request, 'accounts/teacher_student_attendance_report.html', {
+        'students': students,
+        'selected_student': selected_student,
+        'stats': stats,
+        'records': records,
+    })
+
+@teacher_required
+def teacher_notes_view(request):
+    from .forms import NoteForm
+    
+    form = NoteForm()
+    if request.method == "POST":
+        if "upload_note" in request.POST:
+            form = NoteForm(request.POST, request.FILES)
+            if form.is_valid():
+                note = form.save(commit=False)
+                note.uploaded_by = request.user
+                note.save()
+                messages.success(request, "Note uploaded successfully.")
+                return redirect('teacher_notes')
+
+    # Summary Stats
+    notes_list = Note.objects.all().order_by('-created_at')
+    total_notes = notes_list.count()
+    
+    last_week = timezone.now() - timedelta(days=7)
+    weekly_notes = notes_list.filter(created_at__gte=last_week).count()
+    
+    latest_note = notes_list.first()
+    latest_date = latest_note.created_at if latest_note else None
+
+    context = {
+        'notes': notes_list,
+        'form': form,
+        'total_notes': total_notes,
+        'weekly_notes': weekly_notes,
+        'latest_date': latest_date,
+    }
+    return render(request, 'accounts/teacher_notes.html', context)
+
+@teacher_required
+def teacher_note_edit_view(request, note_id):
+    from .forms import NoteForm
+    note = Note.objects.get(id=note_id)
+    form = NoteForm(instance=note)
+
+    if request.method == "POST":
+        form = NoteForm(request.POST, request.FILES, instance=note)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Note updated successfully.")
+            return redirect('teacher_notes')
+
+    return render(request, 'accounts/teacher_note_edit.html', {'form': form, 'note': note})
+
+@teacher_required
+def teacher_note_delete_view(request, note_id):
+    note = Note.objects.get(id=note_id)
+    if request.method == "POST":
+        # Delete the file from storage
+        if note.file:
+            if os.path.exists(note.file.path):
+                os.remove(note.file.path)
+        note.delete()
+        messages.success(request, "Note deleted successfully.")
+        return redirect('teacher_notes')
+    return redirect('teacher_notes')
+
+@teacher_required
+def teacher_live_classes_view(request):
+    from .forms import LiveClassCreationForm
+    form = LiveClassCreationForm()
+
+    if request.method == "POST":
+        if "create_class" in request.POST:
+            form = LiveClassCreationForm(request.POST)
+            if form.is_valid():
+                live_class = form.save(commit=False)
+                live_class.created_by = request.user
+                live_class.save()
+                messages.success(request, "Live class scheduled successfully.")
+                return redirect('teacher_live_classes')
+        elif "delete_class" in request.POST:
+            class_id = request.POST.get('class_id')
+            LiveClass.objects.filter(id=class_id).delete()
+            messages.success(request, "Live class deleted successfully.")
+            return redirect('teacher_live_classes')
+
+    live_classes = LiveClass.objects.all().order_by('-date', '-time')
+    return render(request, 'accounts/teacher_live_classes.html', {'live_classes': live_classes, 'form': form})
