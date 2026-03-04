@@ -1,0 +1,601 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-blue: #3b82f6;
+        --dark-bg: #0f1c3f;
+        --card-dark: #1e293b;
+        --text-muted: #94a3b8;
+        --online-green: #10b981;
+    }
+
+    .solver-wrapper {
+        width: min(90vw, 1200px);
+        margin: 40px auto;
+        padding-bottom: 40px;
+    }
+
+    /* Header Section */
+    .solver-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        color: white;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .icon-badge {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .solver-header h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        color: white;
+    }
+
+    .solver-header p {
+        margin: 4px 0 0 0;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    .online-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--online-green);
+        background: rgba(16, 185, 129, 0.1);
+        padding: 6px 14px;
+        border-radius: 20px;
+    }
+
+    .dot {
+        width: 8px;
+        height: 8px;
+        background-color: var(--online-green);
+        border-radius: 50%;
+        box-shadow: 0 0 8px var(--online-green);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        50% {
+            transform: scale(1.5);
+            opacity: 0.5;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    /* Action Cards */
+    .shorts-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 30px;
+    }
+
+    .shortcut-card {
+        background: #1e1e2d;
+        /* Matching theme dark card */
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 20px 15px;
+        border-radius: 14px;
+        text-align: center;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .shortcut-card:hover {
+        transform: translateY(-5px);
+        background: #252538;
+        border-color: var(--primary-blue);
+        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+    }
+
+    .shortcut-card i {
+        font-size: 1.5rem;
+        color: var(--primary-blue);
+    }
+
+    .shortcut-card span {
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    /* Chat Panel */
+    .chat-panel {
+        background: white;
+        border-radius: 18px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        height: min(72vh, 720px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .messages-area {
+        flex: 1;
+        padding: 30px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        background: #f8fafc;
+    }
+
+    /* Bubble Styles */
+    .bubble {
+        max-width: 80%;
+        padding: 14px 20px;
+        border-radius: 16px;
+        line-height: 1.6;
+        font-size: 0.95rem;
+        position: relative;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .ai-bubble {
+        align-self: flex-start;
+        background: white;
+        color: #1e293b;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        border: 1px solid #e2e8f0;
+    }
+
+    .user-bubble {
+        align-self: flex-end;
+        background: var(--primary-blue);
+        color: white;
+        border-bottom-right-radius: 4px;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    }
+
+    /* Welcome Bubble Special Styling */
+    .welcome-bubble {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1e40af;
+        text-align: center;
+        max-width: 90%;
+        align-self: center;
+        margin-bottom: 10px;
+    }
+
+    /* Typing Indicator */
+    .typing {
+        display: flex;
+        gap: 4px;
+        padding: 10px 15px;
+    }
+
+    .typing span {
+        width: 8px;
+        height: 8px;
+        background: #94a3b8;
+        border-radius: 50%;
+        animation: blink 1.4s infinite;
+    }
+
+    .typing span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
+
+    .typing span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
+
+    @keyframes blink {
+
+        0%,
+        100% {
+            opacity: 0.3;
+        }
+
+        50% {
+            opacity: 1;
+        }
+    }
+
+    /* Input Footer */
+    .chat-footer {
+        padding: 20px 30px;
+        background: white;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .input-wrapper {
+        flex: 1;
+        position: relative;
+    }
+
+    .chat-input {
+        width: 100%;
+        padding: 14px 24px;
+        border: 2px solid #f1f5f9;
+        border-radius: 30px;
+        font-size: 1rem;
+        transition: all 0.2s;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .chat-input:focus {
+        border-color: var(--primary-blue);
+        background: #f8fafc;
+    }
+
+    .send-btn {
+        background: var(--primary-blue);
+        color: white;
+        border: none;
+        padding: 12px 28px;
+        border-radius: 30px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.2s;
+        height: 50px;
+    }
+
+    .send-btn:hover {
+        background: #2563eb;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Scrollbar */
+    .messages-area::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .messages-area::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+
+    /* Math & Response Formatting */
+    .bubble .katex-display {
+        margin: 1em 0;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-bottom: 5px;
+    }
+
+    .bubble p {
+        margin-bottom: 12px;
+    }
+
+    .bubble p:last-child {
+        margin-bottom: 0;
+    }
+
+    .bubble ul,
+    .bubble ol {
+        margin-bottom: 12px;
+        padding-left: 20px;
+    }
+
+    .bubble li {
+        margin-bottom: 6px;
+    }
+
+    @media (max-width: 900px) {
+        .shorts-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 600px) {
+        .solver-wrapper {
+            width: 95vw;
+            margin: 20px auto;
+        }
+
+        .shorts-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .solver-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 15px;
+        }
+
+        .bubble {
+            max-width: 90%;
+        }
+
+        .chat-footer {
+            padding: 15px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="solver-wrapper">
+    <header class="solver-header">
+        <div class="header-left">
+            <div class="icon-badge">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" />
+                    <path d="M12 6v6l4 2" />
+                </svg>
+            </div>
+            <div>
+                <h1>AI Doubt Solver</h1>
+                <p>Instant physics help when your teacher is offline • Learn step-by-step</p>
+            </div>
+        </div>
+        <div class="online-indicator">
+            <div class="dot"></div>
+            Online
+        </div>
+    </header>
+
+    <div class="shorts-grid">
+        <div class="shortcut-card" data-prompt="Explain this physics problem step by step with formulas and reasoning.">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            </svg>
+            <span>Explain Step-by-Step</span>
+        </div>
+        <div class="shortcut-card" data-prompt="Give me only the final answer for this physics question.">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
+            <span>Quick Final Answer</span>
+        </div>
+        <div class="shortcut-card" data-prompt="Explain this concept in very simple terms like I’m a beginner.">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+                <path
+                    d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+            </svg>
+            <span>Make It Simple</span>
+        </div>
+        <div class="shortcut-card"
+            data-prompt="Help me prepare for exam questions related to this topic with key formulas, shortcuts, and important tips.">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+                <path
+                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            <span>Exam Prep Mode</span>
+        </div>
+    </div>
+
+    <div class="chat-panel">
+        <div class="messages-area" id="chat-messages">
+            <div class="bubble ai-bubble welcome-bubble">
+                👋 Hello! I’m your AI Physics Doubt Solver. Ask me anything about physics. I can explain step-by-step,
+                simplify concepts, or help you revise for exams!
+            </div>
+        </div>
+
+        <div class="chat-footer">
+            {% csrf_token %}
+            <div class="input-wrapper">
+                <input type="text" id="chat-input" class="chat-input" placeholder="Type your physics doubt here..."
+                    autocomplete="off">
+            </div>
+            <button id="send-btn" class="send-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+                Send
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const chatMessages = document.getElementById("chat-messages");
+        const chatInput = document.getElementById("chat-input");
+        const sendBtn = document.getElementById("send-btn");
+        const csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        const shortcutCards = document.querySelectorAll('.shortcut-card');
+
+        chatInput.focus();
+
+        // Shortcut Logic
+        shortcutCards.forEach(card => {
+            card.addEventListener('click', () => {
+                chatInput.value = card.getAttribute('data-prompt');
+                chatInput.focus();
+            });
+        });
+
+        // AI Response Formatter (Auto-bolding important labels)
+        function formatAIResponse(text) {
+            if (!text) return "";
+
+            const labels = [
+                "Answer", "Key Idea", "Formula", "Given", "Step \\d+", "Conclusion",
+                "Example", "Note", "Definition", "Reasoning", "Solution", "Important",
+                "Key points", "Explanation", "Concept", "Equation", "Calculation"
+            ];
+
+            let formattedText = text;
+            labels.forEach(label => {
+                const regex = new RegExp(`(^|\\n)(${label}:\\s*)`, "gi");
+                formattedText = formattedText.replace(regex, "$1**$2**");
+            });
+
+            return formattedText;
+        }
+
+        function renderMath(element) {
+            if (window.renderMathInElement) {
+                renderMathInElement(element, {
+                    delimiters: [
+                        { left: '$$', right: '$$', display: true },
+                        { left: '$', right: '$', display: false },
+                        { left: '\\(', right: '\\)', display: false },
+                        { left: '\\[', right: '\\]', display: true }
+                    ],
+                    throwOnError: false,
+                    errorColor: '#cc0000'
+                });
+            }
+        }
+
+        function addMessage(text, type, isMarkdown = false) {
+            const bubble = document.createElement("div");
+            bubble.classList.add("bubble", type === 'user-message' ? "user-bubble" : "ai-bubble");
+
+            if (isMarkdown) {
+                // 1. Protect Math blocks from Markdown mangling
+                const mathBlocks = [];
+                const mathRegex = /(\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|\$[\s\S]+?\$|\\\([\s\S]+?\\\))/g;
+
+                let processedText = text.replace(mathRegex, (match) => {
+                    const id = mathBlocks.length;
+                    mathBlocks.push(match);
+                    return `@@MATH${id}@@`; // Safe placeholder without underscores
+                });
+
+                // 2. Format structure
+                processedText = formatAIResponse(processedText);
+
+                // 3. Parse Markdown
+                let htmlContent = marked.parse(processedText);
+
+                // 4. Restore Math blocks exactly as they were
+                htmlContent = htmlContent.replace(/@@MATH(\d+)@@/g, (match, id) => {
+                    return mathBlocks[parseInt(id)];
+                });
+
+                bubble.innerHTML = DOMPurify.sanitize(htmlContent);
+                renderMath(bubble);
+            } else {
+                bubble.textContent = text;
+            }
+
+            chatMessages.appendChild(bubble);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            return bubble;
+        }
+
+        function showTyping() {
+            const typingDiv = document.createElement("div");
+            typingDiv.classList.add("bubble", "ai-bubble", "typing");
+            typingDiv.innerHTML = '<span></span><span></span><span></span>';
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return typingDiv;
+        }
+
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+
+            addMessage(text, "user-message", false);
+            chatInput.value = "";
+
+            const typingIndicator = showTyping();
+
+            try {
+                const csrfToken = csrfTokenInput ? csrfTokenInput.value : "";
+                const response = await fetch('/ai-chat/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ message: text })
+                });
+
+                if (chatMessages.contains(typingIndicator)) {
+                    chatMessages.removeChild(typingIndicator);
+                }
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.reply) {
+                        addMessage(data.reply, "ai-message", true);
+                    } else if (data.error) {
+                        addMessage("Error: " + data.error, "ai-message", false);
+                    }
+                } else {
+                    addMessage("Couldn’t reach AI right now. Please try again.", "ai-message", false);
+                }
+            } catch (error) {
+                if (chatMessages.contains(typingIndicator)) {
+                    chatMessages.removeChild(typingIndicator);
+                }
+                addMessage("Couldn’t reach AI right now. Please try again.", "ai-message", false);
+            }
+        }
+
+        sendBtn.addEventListener("click", sendMessage);
+        chatInput.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    });
+</script>
+{% endblock %}

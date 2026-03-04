@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    :root {
+        --dark-blue: #0f1c3f;
+        --gradient-bg: linear-gradient(135deg, #0f1c3f 0%, #1e4d58 100%);
+        --turquoise: #33c1a8;
+        --white: #ffffff;
+        --light-bg: #f8f9fc;
+        --text-muted: #8c98a4;
+    }
+
+    .assignments-container {
+        padding: 40px 5%;
+        background-color: var(--light-bg);
+        min-height: 80vh;
+    }
+
+    .page-header {
+        margin-bottom: 30px;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        color: var(--dark-blue);
+        margin-bottom: 10px;
+    }
+
+    .page-header p {
+        color: var(--text-muted);
+    }
+
+    .assignments-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 25px;
+    }
+
+    .assignment-card {
+        background: var(--white);
+        border-radius: 16px;
+        padding: 25px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        transition: transform 0.3s, box-shadow 0.3s;
+        border: 1px solid #edf2f7;
+        display: flex;
+        flex-direction: column;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .assignment-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .status-badge {
+        align-self: flex-start;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .status-pending {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+
+    .status-submitted {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+
+    .status-late {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+
+    .assignment-card h3 {
+        font-size: 1.25rem;
+        margin-bottom: 12px;
+        color: var(--dark-blue);
+    }
+
+    .assignment-card p {
+        font-size: 0.95rem;
+        color: #4a5568;
+        line-height: 1.5;
+        margin-bottom: 20px;
+        flex-grow: 1;
+    }
+
+    .card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 15px;
+        border-top: 1px solid #f1f5f9;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .due-date {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-view {
+        color: var(--turquoise);
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+</style>
+
+<div class="assignments-container">
+    <div class="page-header">
+        <h1>Assignments</h1>
+        <p>Your path to mastery. Complete these tasks for <strong>{{ profile.get_standard_display }}</strong>.</p>
+    </div>
+
+    <div class="assignments-grid">
+        {% for assignment in assignments %}
+        <a href="{% url 'student_assignment_detail' assignment.id %}" class="assignment-card">
+            {% if assignment.submission %}
+            {% if assignment.submission.status == 'Late' %}
+            <span class="status-badge status-late">Submitted Late</span>
+            {% else %}
+            <span class="status-badge status-submitted">Submitted</span>
+            {% endif %}
+            {% else %}
+            <span class="status-badge status-pending">Pending</span>
+            {% endif %}
+
+            <h3>{{ assignment.title }}</h3>
+            <p>{{ assignment.description|truncatewords:20 }}</p>
+
+            <div class="card-footer">
+                <div class="due-date">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    Due: {{ assignment.due_date|date:"M d, H:i" }}
+                </div>
+                <div class="btn-view">
+                    View & Submit
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </div>
+            </div>
+        </a>
+        {% empty %}
+        <div style="grid-column: 1/-1; text-align: center; padding: 60px; background: white; border-radius: 16px;">
+            <p style="color: #64748b; font-style: italic;">No assignments have been posted for your class yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

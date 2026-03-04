@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<section class="courses-wrap">
+  <!-- Header -->
+  <div class="courses-header reveal slow">
+    <p class="section-label">OUR COURSES</p>
+    <h1 class="courses-title">
+      Explore Our Physics <span>Curriculum</span>
+    </h1>
+    <p class="courses-subtitle">
+      Structured CBSE syllabus coverage with live classes, doubt solving, tests, and parent tracking.
+    </p>
+  </div>
+
+  <div class="courses-grid">
+    <!-- Class 11 -->
+    <article class="course-card class11-bg reveal delay-1">
+      <div class="course-top">
+        <span class="tag tag-blue">CBSE</span>
+      </div>
+
+      <h2 class="course-name">Class 11 Physics</h2>
+      <p class="course-desc">
+        Build strong fundamentals with conceptual clarity and numericals.
+      </p>
+
+      <ul class="course-points">
+        <li>Units & Measurements</li>
+        <li>Kinematics & Laws of Motion</li>
+        <li>Work, Energy & Power</li>
+        <li>Rotational Motion</li>
+        <li>Gravitation</li>
+        <li>Thermodynamics</li>
+        <li>Waves</li>
+      </ul>
+
+      <div class="course-meta">
+        <span>⏱ Full Academic Year</span>
+        <span>📘 Class 11</span>
+        <span>⭐ Foundation</span>
+      </div>
+
+      <div class="course-cta">
+        <a class="btn-primary" href="#">View Syllabus</a>
+      </div>
+    </article>
+
+    <!-- Class 12 -->
+    <article class="course-card class12-bg reveal delay-2">
+      <div class="course-top">
+        <span class="tag tag-yellow">CBSE</span>
+      </div>
+
+      <h2 class="course-name">Class 12 Physics</h2>
+      <p class="course-desc">
+        Board-focused preparation with derivations, numericals, and weekly tests.
+      </p>
+
+      <ul class="course-points">
+        <li>Electrostatics</li>
+        <li>Current Electricity</li>
+        <li>Magnetism & EMI</li>
+        <li>Alternating Current</li>
+        <li>Ray & Wave Optics</li>
+        <li>Dual Nature & Atoms</li>
+        <li>Semiconductors</li>
+      </ul>
+
+      <div class="course-meta">
+        <span>📝 Board Exams</span>
+        <span>📊 Weekly Tests</span>
+        <span>👨‍👩‍👦 Parent Tracking</span>
+      </div>
+
+      <div class="course-cta">
+        <a class="btn-primary" href="#">View Syllabus</a>
+      </div>
+    </article>
+  </div>
+</section>
+
+
+{% endblock %}

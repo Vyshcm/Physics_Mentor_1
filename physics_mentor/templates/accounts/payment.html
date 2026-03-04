@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .payment-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 80px);
+        /* Adjust based on navbar height */
+        background-color: #f8f9fc;
+        padding: 40px 20px;
+    }
+
+    .payment-card {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        width: 100%;
+        max-width: 500px;
+        overflow: hidden;
+    }
+
+    .payment-header {
+        background: linear-gradient(135deg, #0f1c3f 0%, #1e4d58 100%);
+        color: white;
+        text-align: center;
+        padding: 40px 30px;
+    }
+
+    .payment-header h2 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 800;
+    }
+
+    .payment-header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+    }
+
+    .price-circle {
+        background: rgba(255, 255, 255, 0.1);
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 20px auto 0;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .price-amount {
+        font-size: 1.8rem;
+        font-weight: bold;
+    }
+
+    .price-interval {
+        font-size: 0.8rem;
+        opacity: 0.8;
+    }
+
+    .payment-body {
+        padding: 40px 30px;
+    }
+
+    .features-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 30px 0;
+    }
+
+    .features-list li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 15px;
+        color: #475569;
+    }
+
+    .features-list li svg {
+        color: #10b981;
+        flex-shrink: 0;
+    }
+
+    .btn-pay {
+        background-color: #10b981;
+        color: white;
+        border: none;
+        width: 100%;
+        padding: 16px;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-pay:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .secure-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 20px;
+        color: #94a3b8;
+        font-size: 0.85rem;
+    }
+</style>
+
+<div class="payment-container">
+    <div class="payment-card">
+        <div class="payment-header">
+            <h2>Unlock Premium</h2>
+            <p>Elevate your physics journey today.</p>
+            <div class="price-circle">
+                <span class="price-amount">₹1999</span>
+                <span class="price-interval">/ month</span>
+            </div>
+        </div>
+        <div class="payment-body">
+            <ul class="features-list">
+                <li>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    Unlimited access to Live Classes
+                </li>
+                <li>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    1-on-1 Doubt Clearing Sessions
+                </li>
+                <li>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    Complete Study Materials & Notes
+                </li>
+                <li>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    Weekly Tests & Performance Tracking
+                </li>
+            </ul>
+
+            {% if is_mock %}
+            <form action="{% url 'payment_success' %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn-pay">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                    </svg>
+                    Mock Payment (Bypass Real Gateway)
+                </button>
+                <p style="text-align: center; font-size: 0.8rem; color: #dc2626; margin-top: 10px;">
+                    * Note: To use the real Razorpay Window, please replace 'rzp_test_YOUR_KEY_HERE' in settings.py with
+                    your real Test Keys. Since keys are currently placeholders, this button simulates a successful
+                    payment.
+                </p>
+            </form>
+            {% else %}
+            <button id="rzp-button1" class="btn-pay">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                </svg>
+                Pay Securely Now
+            </button>
+            <form name="razorpay-form" action="{% url 'payment_success' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+                <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+                <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+            </form>
+
+            <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+            <script>
+                var options = {
+                    "key": "{{ razorpay_key }}",
+                    "amount": "{{ amount }}",
+                    "currency": "INR",
+                    "name": "Physics Mentor",
+                    "description": "Unlock Premium Subscription",
+                    "image": "{% static 'images/logo.png' %}",
+                    "order_id": "{{ order_id }}",
+                    "handler": function (response) {
+                        document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+                        document.getElementById('razorpay_order_id').value = response.razorpay_order_id;
+                        document.getElementById('razorpay_signature').value = response.razorpay_signature;
+                        document.forms['razorpay-form'].submit();
+                    },
+                    "prefill": {
+                        "name": "{{ request.user.first_name }} {{ request.user.last_name }}",
+                        "email": "{{ request.user.email }}",
+                        "contact": ""
+                    },
+                    "theme": {
+                        "color": "#1e4d58"
+                    }
+                };
+                var rzp1 = new Razorpay(options);
+                rzp1.on('payment.failed', function (response) {
+                    alert("Payment Failed - " + response.error.description);
+                });
+                document.getElementById('rzp-button1').onclick = function (e) {
+                    rzp1.open();
+                    e.preventDefault();
+                }
+            </script>
+            {% endif %}
+
+            <div class="secure-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                Secure 256-bit SSL Encryption
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    .submissions-container {
+        padding: 40px 5%;
+    }
+
+    .header-area {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .btn-back {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-back:hover {
+        background: #e2e8f0;
+        transform: translateX(-3px);
+    }
+
+    .submissions-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        border: 1px solid #edf2f7;
+    }
+
+    .submissions-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .submissions-table th,
+    .submissions-table td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .submissions-table th {
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.9rem;
+        background: #f8fafc;
+    }
+
+    .submissions-table td {
+        color: #1e293b;
+        font-size: 0.95rem;
+    }
+
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .status-submitted {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .status-late {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .btn-view {
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .btn-view:hover {
+        text-decoration: underline;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px;
+        color: #64748b;
+    }
+</style>
+
+<div class="submissions-container">
+    <div class="header-area">
+        <div>
+            <a href="{% url 'teacher_assignments' %}" class="btn-back">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back to Assignments
+            </a>
+            <h1 style="margin-top: 20px;">Submissions for: {{ assignment.title }}</h1>
+            <p style="color: #64748b;">Total {{ submissions.count }} student submission{{ submissions.count|pluralize
+                }}.</p>
+        </div>
+    </div>
+
+    <div class="submissions-card">
+        {% if submissions %}
+        <table class="submissions-table">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Submitted Time</th>
+                    <th>Status</th>
+                    <th>File</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in submissions %}
+                <tr>
+                    <td>
+                        <div style="font-weight: 600;">{{ sub.student.get_full_name|default:sub.student.username }}
+                        </div>
+                        <div style="font-size: 0.8rem; color: #64748b;">{{ sub.student.email }}</div>
+                    </td>
+                    <td>{{ sub.submitted_at|date:"M d, Y h:i A" }}</td>
+                    <td>
+                        <span
+                            class="status-badge {% if sub.status == 'Late' %}status-late{% else %}status-submitted{% endif %}">
+                            {{ sub.status }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if sub.file %}
+                        <a href="{{ sub.file.url }}" class="btn-view" target="_blank">View File</a>
+                        {% else %}
+                        <span style="color: #94a3b8;">No file</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1"
+                style="margin-bottom: 20px;">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <p>No submissions have been received for this assignment yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
