@@ -550,7 +550,7 @@
 
         <!-- Attendance -->
         {% if is_paid %}
-        <a href="#" style="text-decoration: none; color: inherit;">
+        <a href="{% url 'student_attendance' %}" style="text-decoration: none; color: inherit;">
             <div class="dashboard-card">
                 <div class="card-icon icon-teal">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -566,19 +566,21 @@
             </div>
         </a>
         {% else %}
-        <div class="dashboard-card">
-            <div class="card-icon icon-teal">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                    <polyline points="16 11 18 13 22 9"></polyline>
-                </svg>
+        <a href="{% url 'student_attendance' %}" style="text-decoration: none; color: inherit;">
+            <div class="dashboard-card">
+                <div class="card-icon icon-teal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <polyline points="16 11 18 13 22 9"></polyline>
+                    </svg>
+                </div>
+                <h3>Attendance: {% if attendance_pct is not None %}{{ attendance_pct }}%{% else %}N/A{% endif %}</h3>
+                <p>{% if attendance_pct is not None %}Your overall attendance rate{% else %}No attendance records found
+                    yet{% endif %}</p>
             </div>
-            <h3>Attendance: {% if attendance_pct is not None %}{{ attendance_pct }}%{% else %}N/A{% endif %}</h3>
-            <p>{% if attendance_pct is not None %}Your overall attendance rate{% else %}No attendance records found
-                yet{% endif %}</p>
-        </div>
+        </a>
         {% endif %}
 
         <!-- Examination -->

@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-blue: #2f6fed;
+        --light-bg: #f8f9fc;
+        --white: #ffffff;
+        --text-dark: #1e293b;
+        --text-muted: #64748b;
+        --success: #10b981;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --border-color: #e2e8f0;
+    }
+
+    body {
+        background-color: var(--light-bg);
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .attendance-header {
+        background: var(--white);
+        padding: 40px 5%;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header-titles h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--text-dark);
+        margin: 0 0 8px 0;
+    }
+
+    .header-titles p {
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    .attendance-container {
+        padding: 40px 5%;
+        width: 80%;
+        max-width: 1400px;
+        margin: 40px auto;
+        box-sizing: border-box;
+    }
+
+    .summary-cards {
+        display: grid;
+        grid-template-columns: 1.3fr 1fr 1fr 1fr;
+        gap: 24px;
+        width: 100%;
+        margin-bottom: 40px;
+    }
+
+    @media (max-width: 800px) {
+        .summary-cards {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 500px) {
+        .summary-cards {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .summary-card {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 28px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+        border: 1px solid var(--border-color);
+    }
+
+    .summary-card.highlight {
+        background: linear-gradient(135deg, #3b6ce6, #2f57c9);
+        color: white;
+        border: none;
+    }
+
+    .summary-card.highlight .summary-value {
+        color: var(--white);
+    }
+
+    .summary-card.highlight .summary-label {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .summary-card.highlight svg {
+        color: var(--white);
+    }
+
+    .summary-icon {
+        margin-bottom: 12px;
+    }
+
+    .summary-icon.success {
+        color: var(--success);
+    }
+
+    .summary-icon.danger {
+        color: var(--danger);
+    }
+
+    .summary-icon.warning {
+        color: var(--warning);
+    }
+
+    .summary-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 4px;
+    }
+
+    .summary-label {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .progress-section {
+        background: var(--white);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 30px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .progress-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: var(--text-dark);
+    }
+
+    .progress-percentage {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary-blue);
+    }
+
+    .progress-bar-container {
+        width: 100%;
+        background-color: #e2e8f0;
+        border-radius: 8px;
+        height: 12px;
+        overflow: hidden;
+        margin-bottom: 12px;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #4f46e5 0%, #ec4899 100%);
+        border-radius: 8px;
+    }
+
+    .progress-text {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    .records-section {
+        background: var(--white);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .records-section h3 {
+        margin: 0 0 20px 0;
+        font-size: 1.1rem;
+        color: var(--text-dark);
+    }
+
+    .record-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 0;
+        border-bottom: 1px solid #f1f5f9;
+
+    }
+
+    .record-item:last-child {
+        border-bottom: none;
+    }
+
+    .record-date-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .record-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .record-icon.Present {
+        background: #ecfdf5;
+        color: var(--success);
+    }
+
+    .record-icon.Absent {
+        background: #fef2f2;
+        color: var(--danger);
+    }
+
+    .record-icon.Late {
+        background: #fffbeb;
+        color: var(--warning);
+    }
+
+    .record-day {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 4px;
+    }
+
+    .record-date {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .status-pill {
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-pill.Present {
+        background: #ecfdf5;
+        color: var(--success);
+    }
+
+    .status-pill.Absent {
+        background: #fef2f2;
+        color: var(--danger);
+    }
+
+    .status-pill.Late {
+        background: #fffbeb;
+        color: var(--warning);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 0;
+        color: var(--text-muted);
+    }
+</style>
+
+<div class="attendance-header">
+    <div class="header-titles">
+        <h1>Physics — Attendance</h1>
+        <p>Your day-by-day attendance record for physics class</p>
+    </div>
+</div>
+
+<div class="attendance-container">
+    <div class="summary-cards">
+        <div class="summary-card highlight">
+            <div class="summary-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+            </div>
+            <div class="summary-value">{{ percentage }}%</div>
+            <div class="summary-label">Attendance</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon success">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            </div>
+            <div class="summary-value">{{ present }}</div>
+            <div class="summary-label">Present</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon danger">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+            </div>
+            <div class="summary-value">{{ absent }}</div>
+            <div class="summary-label">Absent</div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon warning">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+            </div>
+            <div class="summary-value">{{ late }}</div>
+            <div class="summary-label">Late</div>
+        </div>
+    </div>
+
+    <div class="progress-section">
+        <div class="progress-header">
+            <h3>Overall Progress</h3>
+            <span class="progress-percentage">{{ percentage }}%</span>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" style="width: {{ percentage }}%;"></div>
+        </div>
+        <div class="progress-text">{{ attended }} of {{ total }} classes attended</div>
+    </div>
+
+    <div class="records-section">
+        <h3>Day-by-Day Record</h3>
+
+        {% if records %}
+        {% for record in records %}
+        <div class="record-item">
+            <div class="record-date-info">
+                <div class="record-icon {{ record.status }}">
+                    {% if record.status == 'Present' %}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    {% elif record.status == 'Absent' %}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    {% else %}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    {% endif %}
+                </div>
+                <div>
+                    <div class="record-day">{{ record.date|date:"l" }}</div>
+                    <div class="record-date">{{ record.date|date:"Y-m-d" }}</div>
+                </div>
+            </div>
+            <div class="status-pill {{ record.status }}">
+                {{ record.status }}
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state">
+            No attendance records found yet.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1055,3 +1055,32 @@ def student_notes(request):
             'student_standard': profile.standard,
             'profile': profile
         })
+
+@login_required
+def student_attendance(request):
+    profile = request.user.userprofile
+    if profile.role != 'Student':
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+        
+    records = Attendance.objects.filter(student=request.user).order_by('-date')
+    
+    total = records.count()
+    present = records.filter(status='Present').count()
+    absent = records.filter(status='Absent').count()
+    late = records.filter(status='Late').count()
+    
+    attended = present + late
+    percentage = round((attended / total) * 100) if total > 0 else 0
+    
+    context = {
+        'records': records,
+        'total': total,
+        'present': present,
+        'absent': absent,
+        'late': late,
+        'attended': attended,
+        'percentage': percentage,
+        'profile': profile
+    }
+    return render(request, 'accounts/student_attendance.html', context)
