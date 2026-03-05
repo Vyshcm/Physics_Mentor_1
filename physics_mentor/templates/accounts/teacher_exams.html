@@ -159,6 +159,33 @@
         text-decoration: underline;
     }
 
+    .btn-submissions {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        background: #fff;
+        color: #1e293b;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-submissions:hover {
+        background: #f8fafc;
+        border-color: #33c1a8;
+        color: #0f1c3f;
+    }
+
+    .btn-submissions svg {
+        width: 14px;
+        height: 14px;
+        color: #64748b;
+    }
+
     .empty-state {
         grid-column: 1 / -1;
         text-align: center;
@@ -401,12 +428,22 @@
             {% endif %}
 
             <div class="exam-card-footer">
-                <span style="color:#94a3b8; font-size:0.82rem;">Added {{ exam.created_at|date:"M d, Y" }}</span>
-                <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this exam?')">
-                    {% csrf_token %}
-                    <input type="hidden" name="exam_id" value="{{ exam.id }}">
-                    <button type="submit" name="delete_exam" class="btn-delete">Delete</button>
-                </form>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <a href="{% url 'teacher_exam_submissions' exam.id %}" class="btn-submissions">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                        Submissions ({{ exam.submission_count }})
+                    </a>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this exam?')">
+                        {% csrf_token %}
+                        <input type="hidden" name="exam_id" value="{{ exam.id }}">
+                        <button type="submit" name="delete_exam" class="btn-delete">Delete</button>
+                    </form>
+                </div>
             </div>
         </div>
         {% empty %}

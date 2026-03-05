@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.models import User
-from .models import UserProfile, Feedback, Doubt, ParentProfile, ParentMessage, Payment, Attendance, Quiz, QuizResult, Exam, ExamResult, Assignment, AssignmentSubmission, Question, Note, LiveClass
+from .models import UserProfile, Feedback, Doubt, ParentProfile, ParentMessage, Payment, Attendance, Quiz, QuizResult, QuizAttempt, Exam, ExamResult, Assignment, AssignmentSubmission, Question, Note, LiveClass, ExamSubmission
 
 from django.db import IntegrityError
 
@@ -722,7 +722,22 @@ def teacher_exams_view(request):
             return redirect('teacher_exams')
 
     exams = Exam.objects.filter(exam_date__isnull=False).order_by('exam_date', 'start_time')
+    
+    # Annotate exams with submission counts
+    from django.db.models import Count
+    exams = exams.annotate(submission_count=Count('submissions'))
+    
     return render(request, 'accounts/teacher_exams.html', {'exams': exams, 'form': form})
+
+@teacher_required
+def teacher_exam_submissions(request, exam_id):
+    exam = get_object_or_404(Exam, id=exam_id)
+    submissions = ExamSubmission.objects.filter(exam=exam).select_related('student', 'student__userprofile').order_by('-submitted_at')
+    
+    return render(request, 'accounts/teacher_exam_submissions.html', {
+        'exam': exam,
+        'submissions': submissions
+    })
 
 @login_required
 def student_exams(request):
@@ -739,15 +754,52 @@ def student_exams(request):
         exam_date__isnull=False
     ).order_by('exam_date', 'start_time')
 
-    # Annotate each exam with status
+    # Annotate each exam with status and submission
+    from .models import ExamSubmission
+    submissions = ExamSubmission.objects.filter(student=request.user)
+    submission_dict = {s.exam_id: s for s in submissions}
+
     for exam in exams:
         exam.status = 'Upcoming' if exam.exam_date >= today else 'Completed'
+        exam.submission = submission_dict.get(exam.id)
 
     return render(request, 'accounts/student_exams.html', {
         'exams': exams,
         'profile': profile,
         'today': today,
     })
+
+@login_required
+def upload_exam_submission(request, exam_id):
+    profile = request.user.userprofile
+    if profile.role != 'Student':
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+        
+    exam = get_object_or_404(Exam, id=exam_id)
+    
+    # Access Control
+    if exam.target_class != profile.standard:
+        messages.error(request, "You are not allowed to upload for this exam.")
+        return redirect('student_exams')
+        
+    if request.method == "POST":
+        from .forms import ExamSubmissionForm
+        submission, created = ExamSubmission.objects.get_or_create(
+            student=request.user, 
+            exam=exam
+        )
+        
+        form = ExamSubmissionForm(request.POST, request.FILES, instance=submission)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Answer sheet uploaded successfully!")
+        else:
+            # Handle error (e.g., file too large)
+            for error in form.errors.values():
+                messages.error(request, error)
+                
+    return redirect('student_exams')
 
 @teacher_required
 def student_performance_view(request, student_id):
@@ -1109,3 +1161,94 @@ def student_attendance(request):
         'profile': profile
     }
     return render(request, 'accounts/student_attendance.html', context)
+@login_required
+def student_quizzes(request):
+    profile = request.user.userprofile
+    if profile.role != 'Student':
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+        
+    quizzes = Quiz.objects.filter(standard=profile.standard, is_published=True).order_by('-created_at')
+    # Filter out quizzes already attempted if needed, but for now we show all and handle redirection in attempt view
+    
+    return render(request, 'accounts/student_quizzes.html', {
+        'quizzes': quizzes,
+        'profile': profile
+    })
+
+@login_required
+def student_quiz_attempt(request, quiz_id):
+    profile = request.user.userprofile
+    if profile.role != 'Student':
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+        
+    quiz = get_object_or_404(Quiz, id=quiz_id, standard=profile.standard, is_published=True)
+    
+    # Check if a result already exists to prevent retakes if desired, or just show previous result
+    existing_result = QuizResult.objects.filter(student=request.user, quiz=quiz).first()
+    if existing_result:
+        # Redirect to result page if already taken
+        return redirect('student_quiz_result', quiz_id=quiz.id)
+
+    if request.method == "POST":
+        score = 0
+        questions = quiz.questions.all()
+        answers = {}
+        
+        for q in questions:
+            selected_option = request.POST.get(f'question_{q.id}')
+            answers[str(q.id)] = selected_option
+            if selected_option == q.correct_option:
+                score += q.marks
+        
+        # Save Attempt
+        QuizAttempt.objects.create(
+            student=request.user,
+            quiz=quiz,
+            answers=answers,
+            score=score
+        )
+        
+        # Save Result
+        QuizResult.objects.create(
+            student=request.user,
+            quiz=quiz,
+            marks_obtained=score
+        )
+        messages.success(request, f"Quiz submitted successfully! You scored {score}/{quiz.total_marks}")
+        return redirect('student_quiz_result', quiz_id=quiz.id)
+
+    questions = quiz.questions.all()
+    return render(request, 'accounts/student_quiz_attempt.html', {
+        'quiz': quiz,
+        'questions': questions,
+        'profile': profile
+    })
+
+@login_required
+def student_quiz_result(request, quiz_id):
+    profile = request.user.userprofile
+    if profile.role != 'Student':
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+        
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+    attempt = get_object_or_404(QuizAttempt, student=request.user, quiz=quiz)
+    result = get_object_or_404(QuizResult, student=request.user, quiz=quiz)
+    
+    questions_data = []
+    for q in quiz.questions.all():
+        selected = attempt.answers.get(str(q.id))
+        questions_data.append({
+            'question': q,
+            'selected': selected,
+            'is_correct': selected == q.correct_option
+        })
+
+    return render(request, 'accounts/student_quiz_result.html', {
+        'quiz': quiz,
+        'result': result,
+        'questions_data': questions_data,
+        'profile': profile
+    })

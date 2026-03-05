@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    .submissions-page {
+        font-family: 'Inter', sans-serif;
+        padding: 40px 5%;
+        background: #f8fafc;
+        min-height: 100vh;
+    }
+
+    .header-section {
+        margin-bottom: 30px;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #33c1a8;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        margin-bottom: 20px;
+    }
+
+    .header-section h1 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #0f1c3f;
+        margin: 0;
+    }
+
+    .header-section p {
+        color: #64748b;
+        margin: 4px 0 0;
+    }
+
+    .submissions-card {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid #edf2f7;
+        overflow: hidden;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    th {
+        background: #f1f5f9;
+        padding: 16px 24px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+    }
+
+    td {
+        padding: 16px 24px;
+        border-top: 1px solid #f1f5f9;
+        font-size: 0.93rem;
+        color: #1e293b;
+    }
+
+    tr:hover td {
+        background: #fcfdfe;
+    }
+
+    .student-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .student-name {
+        font-weight: 700;
+        color: #0f1c3f;
+    }
+
+    .student-email {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+
+    .badge-std {
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 700;
+    }
+
+    .time-val {
+        font-size: 0.88rem;
+        color: #64748b;
+    }
+
+    .btn-download {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        background: #f1f5f9;
+        color: #0f766e;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+
+    .btn-download:hover {
+        background: #e2e8f0;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        color: #94a3b8;
+    }
+
+    .empty-state svg {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+</style>
+
+<div class="submissions-page">
+    <div class="header-section">
+        <a href="{% url 'teacher_exams' %}" class="back-link">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15 18 9 12 15 6" />
+            </svg>
+            Back to Exams
+        </a>
+        <h1>Submissions for {{ exam.title }}</h1>
+        <p>Class {{ exam.target_class }} &bull; {{ submissions.count }} Submission(s)</p>
+    </div>
+
+    <div class="submissions-card">
+        {% if submissions %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Class</th>
+                        <th>Submitted At</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sub in submissions %}
+                    <tr>
+                        <td>
+                            <div class="student-info">
+                                <span class="student-name">{{ sub.student.get_full_name|default:sub.student.username
+                                    }}</span>
+                                <span class="student-email">{{ sub.student.email }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge-std">Class {{ sub.student.userprofile.standard }}</span>
+                        </td>
+                        <td>
+                            <div class="time-val">
+                                {{ sub.submitted_at|date:"M d, Y" }} <br>
+                                <span style="opacity: 0.7;">{{ sub.submitted_at|time:"h:i A" }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="{{ sub.answer_file.url }}" target="_blank" class="btn-download">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path>
+                                </svg>
+                                Download
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path
+                    d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848 1.5 1.5 0 01.466 2.336 7.5 7.5 0 01-14.963-1.04z">
+                </path>
+            </svg>
+            <p>No submissions yet for this exam.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

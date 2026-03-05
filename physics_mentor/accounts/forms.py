@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm,AuthenticationForm,PasswordResetForm
 from django.contrib.auth.models import User
 from django import forms
-from .models import UserProfile, Feedback, Doubt, Assignment, AssignmentSubmission, Quiz, Payment, Exam, Question, Note, LiveClass
+from .models import UserProfile, Feedback, Doubt, Assignment, AssignmentSubmission, Quiz, Payment, Exam, Question, Note, LiveClass, ExamSubmission
 
 
 from django.core.exceptions import ValidationError
@@ -145,6 +145,21 @@ class AssignmentSubmissionForm(forms.ModelForm):
             'file': forms.ClearableFileInput(attrs={'class': 'form-input'}),
         }
 
+class ExamSubmissionForm(forms.ModelForm):
+    class Meta:
+        model = ExamSubmission
+        fields = ['answer_file']
+        widgets = {
+            'answer_file': forms.ClearableFileInput(attrs={'class': 'form-input'}),
+        }
+
+    def clean_answer_file(self):
+        file = self.cleaned_data.get('answer_file')
+        if file:
+            if file.size > 100 * 1024 * 1024:  # 100MB
+                raise ValidationError("File size must be under 100MB.")
+        return file
+
 class QuizCreationForm(forms.ModelForm):
     class Meta:
         model = Quiz
@@ -163,11 +178,11 @@ class QuestionCreationForm(forms.ModelForm):
         model = Question
         fields = ['text', 'option_a', 'option_b', 'option_c', 'option_d', 'correct_option', 'marks']
         widgets = {
-            'text': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Enter question text...', 'rows': 3}),
-            'option_a': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Option A'}),
-            'option_b': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Option B'}),
-            'option_c': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Option C'}),
-            'option_d': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Option D'}),
+            'text': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': r'Enter question text... (Use \(...\) for inline and \[...\] for block physics formulas)', 'rows': 4}),
+            'option_a': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Option A (You can use math symbols here)', 'rows': 2}),
+            'option_b': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Option B', 'rows': 2}),
+            'option_c': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Option C', 'rows': 2}),
+            'option_d': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Option D', 'rows': 2}),
             'correct_option': forms.Select(attrs={'class': 'form-input'}),
             'marks': forms.NumberInput(attrs={'class': 'form-input'}),
         }

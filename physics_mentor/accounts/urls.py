@@ -26,6 +26,7 @@ urlpatterns = [
     path('teacher/quizzes/<int:quiz_id>/questions/', views.teacher_quiz_questions_view, name='teacher_quiz_questions'),
     path('teacher/quizzes/<int:quiz_id>/toggle-publish/', views.teacher_quiz_toggle_publish, name='teacher_quiz_toggle_publish'),
     path('teacher/exams/', views.teacher_exams_view, name='teacher_exams'),
+    path('teacher/exams/<int:exam_id>/submissions/', views.teacher_exam_submissions, name='teacher_exam_submissions'),
     path('teacher/payments/', views.teacher_payments_view, name='teacher_payments'),
     path('teacher/doubts/', views.teacher_doubts_view, name='teacher_doubts'),
     path('teacher/parent-messages/', views.teacher_parent_messages_view, name='teacher_parent_messages'),
@@ -43,4 +44,8 @@ urlpatterns = [
     path('student/notes/', views.student_notes, name='student_notes'),
     path('student/attendance/', views.student_attendance, name='student_attendance'),
     path('student/exams/', views.student_exams, name='student_exams'),
+    path('student/exams/<int:exam_id>/upload/', views.upload_exam_submission, name='upload_exam_submission'),
+    path('student/quizzes/', views.student_quizzes, name='student_quizzes'),
+    path('student/quiz/<int:quiz_id>/', views.student_quiz_attempt, name='student_quiz_attempt'),
+    path('student/quiz/<int:quiz_id>/result/', views.student_quiz_result, name='student_quiz_result'),
 ]

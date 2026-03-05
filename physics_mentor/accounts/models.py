@@ -158,6 +158,22 @@ class QuizResult(models.Model):
     def __str__(self):
         return f"{self.student.username} - {self.quiz.title}: {self.marks_obtained}/{self.quiz.total_marks}"
 
+class QuizAttempt(models.Model):
+    """Stores each student's submitted answers per quiz for scoring review."""
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='quiz_attempts')
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='attempts')
+    # answers stored as {str(question_id): "A"|"B"|"C"|"D"}
+    answers = models.JSONField(default=dict)
+    score = models.IntegerField(null=True, blank=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('student', 'quiz')
+
+    def __str__(self):
+        return f"{self.student.username} attempt on {self.quiz.title}"
+
+
 class Exam(models.Model):
     CLASS_CHOICES = [
         (10, 'Class 10'),
@@ -188,6 +204,18 @@ class ExamResult(models.Model):
 
     def __str__(self):
         return f"{self.student.username} - {self.exam.title}: {self.marks_obtained}/{self.exam.total_marks}"
+
+class ExamSubmission(models.Model):
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='submissions')
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='exam_submissions')
+    answer_file = models.FileField(upload_to='exam_submissions/')
+    submitted_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('exam', 'student')
+
+    def __str__(self):
+        return f"Submission: {self.student.username} for {self.exam.title}"
 
 class Assignment(models.Model):
     title = models.CharField(max_length=200)

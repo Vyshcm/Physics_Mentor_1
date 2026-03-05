@@ -1,0 +1,352 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<!-- MathJax Configuration — loads ONCE, renders LaTeX in question + options -->
+<script>
+    window.MathJax = {
+        tex: {
+            inlineMath: [['\\(', '\\)'], ['$', '$']],
+            displayMath: [['\\[', '\\]'], ['$$', '$$']],
+            processEscapes: true
+        },
+        options: {
+            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+        }
+    };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<style>
+    .quiz-attempt-container {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 30px 20px 60px;
+    }
+
+    /* Header bar */
+    .quiz-header {
+        background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+        color: white;
+        border-radius: 14px;
+        padding: 24px 30px;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .quiz-header h1 {
+        font-size: 1.5rem;
+        margin: 0;
+    }
+
+    .quiz-meta-badges {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        padding: 5px 14px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    /* Question card */
+    .question-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 28px 30px;
+        margin-bottom: 22px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .question-number {
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #2563eb;
+        margin-bottom: 10px;
+    }
+
+    .question-text {
+        font-size: 1.05rem;
+        color: #1e293b;
+        font-weight: 600;
+        line-height: 1.65;
+        margin-bottom: 20px;
+    }
+
+    /* Options */
+    .options-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .option-label {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px 16px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        font-size: 0.98rem;
+        color: #334155;
+        line-height: 1.5;
+        user-select: none;
+    }
+
+    .option-label:hover {
+        border-color: #2563eb;
+        background: #eff6ff;
+    }
+
+    .option-label input[type="radio"] {
+        display: none;
+    }
+
+    .option-label input[type="radio"]:checked~.option-bubble {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: white;
+    }
+
+    .option-label:has(input:checked) {
+        border-color: #2563eb;
+        background: #eff6ff;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    }
+
+    .option-bubble {
+        min-width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 2px solid #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: #64748b;
+        flex-shrink: 0;
+        transition: all 0.18s ease;
+    }
+
+    .option-text {
+        flex: 1;
+        padding-top: 4px;
+    }
+
+    /* Progress bar */
+    .progress-area {
+        background: white;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 24px;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .progress-label {
+        font-size: 0.85rem;
+        color: #64748b;
+        white-space: nowrap;
+    }
+
+    .progress-bar-track {
+        flex: 1;
+        background: #e2e8f0;
+        border-radius: 99px;
+        height: 8px;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: #2563eb;
+        border-radius: 99px;
+        transition: width 0.3s ease;
+    }
+
+    /* Submit */
+    .submit-area {
+        text-align: center;
+        padding: 20px 0 10px;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 14px 48px;
+        font-size: 1.05rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.2s;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    }
+
+    .btn-submit:hover {
+        opacity: 0.9;
+    }
+
+    /* Timer */
+    .timer-chip {
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        padding: 6px 16px;
+        font-size: 1rem;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 1px;
+    }
+
+    .timer-chip.warning {
+        background: rgba(239, 68, 68, 0.25);
+        border-color: rgba(239, 68, 68, 0.5);
+    }
+</style>
+
+<div class="quiz-attempt-container">
+    <!-- Quiz Header -->
+    <div class="quiz-header">
+        <div>
+            <div style="font-size:0.8rem; opacity:0.75; margin-bottom:4px;">QUIZ</div>
+            <h1>{{ quiz.title }}</h1>
+        </div>
+        <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+            {% if quiz.duration_minutes %}
+            <div class="timer-chip" id="quizTimer">{{ quiz.duration_minutes }}:00</div>
+            {% endif %}
+            <div class="quiz-meta-badges">
+                <span class="badge">{{ questions|length }} Questions</span>
+                <span class="badge">{{ quiz.total_marks }} Marks</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-area">
+        <span class="progress-label" id="progressLabel">0 / {{ questions|length }} answered</span>
+        <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+        </div>
+    </div>
+
+    <!-- Questions Form -->
+    <form method="POST" id="quizForm">
+        {% csrf_token %}
+
+        {% for q in questions %}
+        <div class="question-card" id="qcard-{{ forloop.counter }}">
+            <div class="question-number">Question {{ forloop.counter }} of {{ questions|length }} &nbsp;·&nbsp; {{
+                q.marks }} Mark{% if q.marks != 1 %}s{% endif %}</div>
+            <div class="question-text">{{ q.text }}</div>
+
+            <div class="options-list">
+                <!-- Option A -->
+                <label class="option-label">
+                    <input type="radio" name="question_{{ q.id }}" value="A" onchange="updateProgress()">
+                    <div class="option-bubble">A</div>
+                    <div class="option-text">{{ q.option_a }}</div>
+                </label>
+                <!-- Option B -->
+                <label class="option-label">
+                    <input type="radio" name="question_{{ q.id }}" value="B" onchange="updateProgress()">
+                    <div class="option-bubble">B</div>
+                    <div class="option-text">{{ q.option_b }}</div>
+                </label>
+                <!-- Option C -->
+                <label class="option-label">
+                    <input type="radio" name="question_{{ q.id }}" value="C" onchange="updateProgress()">
+                    <div class="option-bubble">C</div>
+                    <div class="option-text">{{ q.option_c }}</div>
+                </label>
+                <!-- Option D -->
+                <label class="option-label">
+                    <input type="radio" name="question_{{ q.id }}" value="D" onchange="updateProgress()">
+                    <div class="option-bubble">D</div>
+                    <div class="option-text">{{ q.option_d }}</div>
+                </label>
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="submit-area">
+            <button type="submit" class="btn-submit" onclick="return confirmSubmit()">
+                ✓ &nbsp; Submit Quiz
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const totalQuestions = {{ questions| length }};
+
+    // --- Progress tracker ---
+    function updateProgress() {
+        const radios = document.querySelectorAll('#quizForm input[type="radio"]');
+        const names = new Set();
+        radios.forEach(r => { if (r.checked) names.add(r.name); });
+        const answered = names.size;
+        const pct = totalQuestions > 0 ? (answered / totalQuestions * 100) : 0;
+        document.getElementById('progressFill').style.width = pct + '%';
+        document.getElementById('progressLabel').textContent = answered + ' / ' + totalQuestions + ' answered';
+    }
+
+    // --- Confirm submit ---
+    function confirmSubmit() {
+        const radios = document.querySelectorAll('#quizForm input[type="radio"]');
+        const names = new Set();
+        radios.forEach(r => { if (r.checked) names.add(r.name); });
+        const answered = names.size;
+        const unanswered = totalQuestions - answered;
+        if (unanswered > 0) {
+            return confirm('You have ' + unanswered + ' unanswered question(s). Submit anyway?');
+        }
+        return true;
+    }
+
+    // --- Countdown timer ---
+    {% if quiz.duration_minutes %}
+    (function () {
+        let seconds = {{ quiz.duration_minutes }
+    } * 60;
+    const timerEl = document.getElementById('quizTimer');
+    const interval = setInterval(function () {
+        seconds--;
+        if (seconds <= 0) {
+            clearInterval(interval);
+            document.getElementById('quizForm').submit();
+            return;
+        }
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        timerEl.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+        if (seconds <= 60) timerEl.classList.add('warning');
+    }, 1000);
+    }) ();
+    {% endif %}
+
+    // Re-render MathJax after dynamic content is ready
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.MathJax && MathJax.typesetPromise) {
+            MathJax.typesetPromise();
+        }
+    });
+</script>
+{% endblock %}
