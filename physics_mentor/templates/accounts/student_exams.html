@@ -1,0 +1,431 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    * {
+        box-sizing: border-box;
+    }
+
+    .exams-page {
+        font-family: 'Inter', sans-serif;
+        min-height: 100vh;
+        background: #f4f6fb;
+    }
+
+    /* ── Hero Banner ── */
+    .exams-hero {
+        background: linear-gradient(135deg, #0f1c3f 0%, #1e4d58 100%);
+        color: #fff;
+        padding: 48px 5% 56px;
+    }
+
+    .exams-hero-inner {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .hero-icon {
+        width: 54px;
+        height: 54px;
+        background: #ef4444;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .hero-icon svg {
+        width: 28px;
+        height: 28px;
+        color: #fff;
+    }
+
+    .exams-hero h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin: 0 0 4px;
+    }
+
+    .exams-hero p {
+        margin: 0;
+        font-size: 0.95rem;
+        opacity: 0.75;
+    }
+
+    /* ── Body ── */
+    .exams-body {
+        padding: 36px 5%;
+        max-width: 860px;
+        margin: 0 auto;
+    }
+
+    /* ── Exam Card ── */
+    .exam-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 24px 26px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+        border: 1px solid #edf2f7;
+        transition: box-shadow 0.2s;
+    }
+
+    .exam-card:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    /* ── Card Header ── */
+    .exam-card-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+
+    .exam-card-title {
+        font-size: 1.08rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .status-upcoming {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-completed {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .status-badge::before {
+        content: '';
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    /* ── Card Meta ── */
+    .exam-card-meta {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.88rem;
+        color: #64748b;
+        margin-bottom: 10px;
+    }
+
+    .exam-card-meta svg {
+        width: 15px;
+        height: 15px;
+        color: #94a3b8;
+        flex-shrink: 0;
+    }
+
+    .meta-sep {
+        color: #cbd5e0;
+        margin: 0 2px;
+    }
+
+    /* ── Description ── */
+    .exam-desc {
+        font-size: 0.87rem;
+        color: #64748b;
+        padding: 10px 14px;
+        background: #f8fafc;
+        border-radius: 8px;
+        border-left: 3px solid #33c1a8;
+        margin-bottom: 16px;
+        line-height: 1.5;
+    }
+
+    /* ── Buttons Row ── */
+    .exam-card-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+        padding-top: 16px;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .btn-download {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border: 1.5px solid #cbd5e0;
+        border-radius: 10px;
+        background: #fff;
+        color: #374151;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: border-color 0.2s, background 0.2s;
+        white-space: nowrap;
+    }
+
+    .btn-download:hover {
+        border-color: #33c1a8;
+        background: #f0fdfb;
+        color: #0f766e;
+    }
+
+    .btn-download svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .btn-join {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: opacity 0.2s;
+        white-space: nowrap;
+    }
+
+    .btn-join:hover {
+        opacity: 0.9;
+        color: #fff;
+    }
+
+    .btn-join svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* ── Duration chip ── */
+    .chip-duration {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #f1f5f9;
+        color: #475569;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+        margin-left: auto;
+    }
+
+    .chip-duration svg {
+        width: 13px;
+        height: 13px;
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: #fff;
+        border-radius: 16px;
+        border: 1.5px dashed #e2e8f0;
+    }
+
+    .empty-state svg {
+        width: 56px;
+        height: 56px;
+        color: #cbd5e0;
+        margin-bottom: 18px;
+    }
+
+    .empty-state h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #374151;
+        margin: 0 0 8px;
+    }
+
+    .empty-state p {
+        color: #94a3b8;
+        font-size: 0.93rem;
+        margin: 0;
+    }
+
+    /* ── Back link ── */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #33c1a8;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        margin-bottom: 24px;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+        .exams-hero {
+            padding: 32px 5% 40px;
+        }
+
+        .exams-hero h1 {
+            font-size: 1.5rem;
+        }
+
+        .exam-card-actions {
+            flex-direction: column;
+        }
+
+        .btn-download,
+        .btn-join {
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="exams-page">
+    <!-- Hero Banner -->
+    <div class="exams-hero">
+        <div class="exams-hero-inner">
+            <div class="hero-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <rect x="2" y="3" width="20" height="14" rx="2" />
+                    <line x1="8" y1="21" x2="16" y2="21" />
+                    <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+            </div>
+            <div>
+                <h1>Examinations</h1>
+                <p>Class {{ profile.standard }} &mdash; Your scheduled exams</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Body -->
+    <div class="exams-body">
+        <a href="{% url 'dashboard' %}" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15 18 9 12 15 6" />
+            </svg>
+            Back to Dashboard
+        </a>
+
+        {% if exams %}
+        {% for exam in exams %}
+        <div class="exam-card">
+            <!-- Header: title + status badge -->
+            <div class="exam-card-header">
+                <h3 class="exam-card-title">{{ exam.title }}</h3>
+                {% if exam.status == 'Upcoming' %}
+                <span class="status-badge status-upcoming">Upcoming</span>
+                {% else %}
+                <span class="status-badge status-completed">Completed</span>
+                {% endif %}
+                {% if exam.duration_minutes %}
+                <span class="chip-duration">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    {{ exam.duration_minutes }} min
+                </span>
+                {% endif %}
+            </div>
+
+            <!-- Date / time meta -->
+            <div class="exam-card-meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                {{ exam.exam_date|date:"M d, Y" }}
+                {% if exam.start_time %}
+                <span class="meta-sep">·</span>
+                {{ exam.start_time|time:"h:i A" }}
+                {% endif %}
+                <span class="meta-sep">·</span>
+                {% if exam.question_file %}
+                Question paper available
+                {% else %}
+                No question paper
+                {% endif %}
+            </div>
+
+            <!-- Description -->
+            {% if exam.description %}
+            <div class="exam-desc">{{ exam.description }}</div>
+            {% endif %}
+
+            <!-- Action buttons -->
+            <div class="exam-card-actions">
+                {% if exam.question_file %}
+                <a href="{{ exam.question_file.url }}" target="_blank" class="btn-download">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Download Questions
+                </a>
+                {% else %}
+                <span class="btn-download" style="opacity:0.45; cursor:default;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    No File
+                </span>
+                {% endif %}
+
+                {% if exam.exam_link %}
+                <a href="{{ exam.exam_link }}" target="_blank" rel="noopener noreferrer" class="btn-join">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <polygon points="23 7 16 12 23 17 23 7" />
+                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                    </svg>
+                    Join Exam (Camera)
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M8 7h8M8 11h8M8 15h4" />
+            </svg>
+            <h3>No Exams Yet</h3>
+            <p>No exams scheduled yet for Class {{ profile.standard }}.<br>Check back soon!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

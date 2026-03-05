@@ -710,7 +710,7 @@ def teacher_exams_view(request):
 
     if request.method == "POST":
         if "create_exam" in request.POST:
-            form = ExamCreationForm(request.POST)
+            form = ExamCreationForm(request.POST, request.FILES)
             if form.is_valid():
                 form.save()
                 messages.success(request, "Exam created successfully.")
@@ -721,8 +721,33 @@ def teacher_exams_view(request):
             messages.success(request, "Exam deleted.")
             return redirect('teacher_exams')
 
-    exams = Exam.objects.all().order_by('-created_at')
+    exams = Exam.objects.filter(exam_date__isnull=False).order_by('exam_date', 'start_time')
     return render(request, 'accounts/teacher_exams.html', {'exams': exams, 'form': form})
+
+@login_required
+def student_exams(request):
+    profile = request.user.userprofile
+    if profile.role != 'Student':
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+
+    from django.utils import timezone
+    today = timezone.now().date()
+
+    exams = Exam.objects.filter(
+        target_class=profile.standard,
+        exam_date__isnull=False
+    ).order_by('exam_date', 'start_time')
+
+    # Annotate each exam with status
+    for exam in exams:
+        exam.status = 'Upcoming' if exam.exam_date >= today else 'Completed'
+
+    return render(request, 'accounts/student_exams.html', {
+        'exams': exams,
+        'profile': profile,
+        'today': today,
+    })
 
 @teacher_required
 def student_performance_view(request, student_id):

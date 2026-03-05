@@ -3,186 +3,506 @@
 
 {% block content %}
 <style>
-    .manage-container {
+    .exams-container {
         padding: 40px 5%;
     }
 
-    .header-area {
+    .page-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 30px;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+        gap: 16px;
     }
 
-    .btn-add {
-        background: #33c1a8;
+    .page-header h1 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #0f1c3f;
+        margin: 0;
+    }
+
+    .page-header p {
+        color: #64748b;
+        margin: 4px 0 0;
+        font-size: 0.95rem;
+    }
+
+    .btn-create {
+        background: linear-gradient(135deg, #33c1a8, #0f9d84);
         color: white;
-        padding: 10px 20px;
+        padding: 11px 22px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: opacity 0.2s;
+        text-decoration: none;
+    }
+
+    .btn-create:hover {
+        opacity: 0.9;
+        color: white;
+    }
+
+    .exams-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 22px;
+    }
+
+    .exam-card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+        border: 1px solid #edf2f7;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .exam-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .exam-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .badge-class {
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .exam-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 0.87rem;
+        color: #64748b;
+    }
+
+    .exam-meta-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .exam-meta-row svg {
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+        color: #94a3b8;
+    }
+
+    .exam-desc {
+        font-size: 0.85rem;
+        color: #64748b;
+        background: #f8fafc;
+        padding: 8px 12px;
         border-radius: 8px;
+        border-left: 3px solid #33c1a8;
+    }
+
+    .exam-card-footer {
+        border-top: 1px solid #f1f5f9;
+        padding-top: 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .link-small {
+        font-size: 0.82rem;
+        color: #33c1a8;
         text-decoration: none;
         font-weight: 600;
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        gap: 4px;
+    }
+
+    .link-small:hover {
+        text-decoration: underline;
+    }
+
+    .btn-delete {
+        background: none;
         border: none;
+        color: #ef4444;
         cursor: pointer;
+        font-size: 0.87rem;
+        font-weight: 700;
+        padding: 0;
     }
 
-    .btn-add:hover {
-        background: #2db099;
+    .btn-delete:hover {
+        text-decoration: underline;
     }
 
-    .quiz-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 20px;
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 70px 20px;
+        background: #fff;
+        border-radius: 14px;
+        border: 1px dashed #cbd5e0;
+        color: #94a3b8;
     }
 
-    .quiz-card {
-        background: white;
-        border-radius: 12px;
-        padding: 25px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
-        border: 1px solid #edf2f7;
+    .empty-state svg {
+        width: 48px;
+        height: 48px;
+        color: #cbd5e0;
+        margin-bottom: 14px;
     }
 
-    .quiz-card h3 {
-        margin: 0 0 15px 0;
-        color: #1e293b;
+    .empty-state p {
+        font-size: 1rem;
+        margin: 0;
     }
 
-    .quiz-info {
+    /* Messages */
+    .alert {
+        padding: 12px 18px;
+        border-radius: 10px;
+        margin-bottom: 24px;
+        font-size: 0.93rem;
+        font-weight: 600;
+    }
+
+    .alert-success {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .alert-error {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    /* ─── Modal ─── */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 28, 63, 0.55);
+        z-index: 900;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px 20px;
+        overflow-y: auto;
+    }
+
+    .modal-overlay.open {
         display: flex;
-        flex-direction: column;
-        gap: 10px;
-        margin-bottom: 20px;
-        font-size: 0.9rem;
-        color: #64748b;
     }
 
-    .info-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
+    .modal-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 32px;
+        width: 100%;
+        max-width: 560px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+        position: relative;
     }
 
-    .card-actions {
-        border-top: 1px solid #f1f5f9;
-        padding-top: 15px;
+    .modal-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        margin-bottom: 24px;
     }
 
-    .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
+    .modal-header h2 {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #0f1c3f;
+        margin: 0;
     }
 
-    .modal-content {
-        background: white;
-        margin: 15% auto;
-        padding: 30px;
-        width: 90%;
-        max-width: 450px;
-        border-radius: 12px;
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.6rem;
+        cursor: pointer;
+        color: #94a3b8;
+        line-height: 1;
+    }
+
+    .modal-close:hover {
+        color: #1e293b;
     }
 
     .form-group {
-        margin-bottom: 15px;
+        margin-bottom: 16px;
     }
 
     .form-group label {
         display: block;
-        margin-bottom: 5px;
-        font-weight: 600;
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 6px;
     }
 
-    .form-input {
+    .form-group label .req {
+        color: #ef4444;
+    }
+
+    .form-group .form-input,
+    .form-group .form-textarea,
+    .form-group select,
+    .form-group input[type="date"],
+    .form-group input[type="time"],
+    .form-group input[type="number"],
+    .form-group input[type="url"],
+    .form-group input[type="text"],
+    .form-group input[type="file"] {
         width: 100%;
-        padding: 10px;
-        border: 1px solid #e2e8f0;
-        border-radius: 6px;
+        padding: 10px 14px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 0.93rem;
+        color: #1e293b;
+        background: #fff;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+    }
+
+    .form-group .form-input:focus,
+    .form-group select:focus,
+    .form-group input:focus,
+    .form-group .form-textarea:focus {
+        border-color: #33c1a8;
+    }
+
+    .form-group .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 4px 0 0;
+        color: #ef4444;
+        font-size: 0.82rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 13px;
+        background: linear-gradient(135deg, #33c1a8, #0f9d84);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 8px;
+        transition: opacity 0.2s;
+    }
+
+    .btn-submit:hover {
+        opacity: 0.9;
     }
 </style>
 
-<div class="manage-container">
-    <div class="header-area">
+<div class="exams-container">
+    {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+    {% endfor %}
+
+    <div class="page-header">
         <div>
-            <h1>Exam Management</h1>
-            <p style="color: #64748b;">Manage major examinations and results.</p>
+            <h1>Examinations</h1>
+            <p>Create and manage exams for each class. Students see only their class's exams.</p>
         </div>
-        <button class="btn-add" onclick="openModal()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
+        <button class="btn-create" onclick="openModal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
             Create New Exam
         </button>
     </div>
 
-    <div class="quiz-grid">
+    <div class="exams-grid">
         {% for exam in exams %}
-        <div class="quiz-card">
-            <h3>{{ exam.title }}</h3>
-            <div class="quiz-info">
-                <div class="info-row">
-                    <span>Total Marks:</span> <strong>{{ exam.total_marks }}</strong>
-                </div>
-                <div class="info-row">
-                    <span>Created:</span> {{ exam.created_at|date:"M d, Y" }}
-                </div>
-                <div class="info-row">
-                    <span>{{ exam.results.count }} Results Recorded</span>
-                </div>
+        <div class="exam-card">
+            <div class="exam-card-header">
+                <h3 class="exam-title">{{ exam.title }}</h3>
+                <span class="badge-class">Class {{ exam.target_class }}</span>
             </div>
-            <div class="card-actions">
-                <span style="color: #33c1a8; font-weight: 600; font-size: 0.9rem;">Major Assessment</span>
+
+            <div class="exam-meta">
+                <div class="exam-meta-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" />
+                        <line x1="16" y1="2" x2="16" y2="6" />
+                        <line x1="8" y1="2" x2="8" y2="6" />
+                        <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    {{ exam.exam_date|date:"M d, Y" }}
+                    {% if exam.start_time %}&nbsp;·&nbsp;{{ exam.start_time|time:"h:i A" }}{% endif %}
+                </div>
+                {% if exam.duration_minutes %}
+                <div class="exam-meta-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    {{ exam.duration_minutes }} minutes
+                </div>
+                {% endif %}
+                <div class="exam-meta-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                    </svg>
+                    <a href="{{ exam.exam_link }}" target="_blank" class="link-small">Exam Link ↗</a>
+                </div>
+                {% if exam.question_file %}
+                <div class="exam-meta-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                    </svg>
+                    <a href="{{ exam.question_file.url }}" target="_blank" class="link-small">Question Paper ↗</a>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if exam.description %}
+            <div class="exam-desc">{{ exam.description }}</div>
+            {% endif %}
+
+            <div class="exam-card-footer">
+                <span style="color:#94a3b8; font-size:0.82rem;">Added {{ exam.created_at|date:"M d, Y" }}</span>
                 <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this exam?')">
                     {% csrf_token %}
                     <input type="hidden" name="exam_id" value="{{ exam.id }}">
-                    <button type="submit" name="delete_exam"
-                        style="background:none; border:none; color: #ef4444; cursor:pointer; font-size: 0.9rem; font-weight: 600;">Delete</button>
+                    <button type="submit" name="delete_exam" class="btn-delete">Delete</button>
                 </form>
             </div>
         </div>
         {% empty %}
-        <div style="grid-column: 1/-1; text-align: center; padding: 60px; background: white; border-radius: 12px;">
-            <p style="color: #64748b;">No exams created yet.</p>
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M8 7h8M8 11h8M8 15h4" />
+            </svg>
+            <p>No exams created yet. Click <strong>"Create New Exam"</strong> to get started.</p>
         </div>
         {% endfor %}
     </div>
 </div>
 
-<div id="createModal" class="modal">
-    <div class="modal-content">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+<!-- Create Exam Modal -->
+<div class="modal-overlay" id="createModal">
+    <div class="modal-box">
+        <div class="modal-header">
             <h2>Create New Exam</h2>
-            <span onclick="closeModal()" style="cursor: pointer; font-size: 1.5rem;">&times;</span>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
         </div>
-        <form method="POST">
+
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="hidden" name="create_exam" value="1">
-            {% for field in form %}
+
             <div class="form-group">
-                <label>{{ field.label }}</label>
-                {{ field }}
+                <label>{{ form.title.label }} <span class="req">*</span></label>
+                {{ form.title }}
+                {{ form.title.errors }}
             </div>
-            {% endfor %}
-            <button type="submit" class="btn-add" style="width: 100%; justify-content: center; margin-top: 10px;">Create
-                Exam</button>
+
+            <div class="form-group">
+                <label>{{ form.target_class.label }} <span class="req">*</span></label>
+                {{ form.target_class }}
+                {{ form.target_class.errors }}
+            </div>
+
+            <div class="form-group">
+                <label>{{ form.exam_date.label }} <span class="req">*</span></label>
+                {{ form.exam_date }}
+                {{ form.exam_date.errors }}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>{{ form.start_time.label }}</label>
+                    {{ form.start_time }}
+                    {{ form.start_time.errors }}
+                </div>
+                <div class="form-group">
+                    <label>{{ form.duration_minutes.label }}</label>
+                    {{ form.duration_minutes }}
+                    {{ form.duration_minutes.errors }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>{{ form.description.label }}</label>
+                {{ form.description }}
+                {{ form.description.errors }}
+            </div>
+
+            <div class="form-group">
+                <label>{{ form.question_file.label }} <span class="req">*</span></label>
+                {{ form.question_file }}
+                {{ form.question_file.errors }}
+            </div>
+
+            <div class="form-group">
+                <label>{{ form.exam_link.label }} <span class="req">*</span></label>
+                {{ form.exam_link }}
+                {{ form.exam_link.errors }}
+            </div>
+
+            <button type="submit" class="btn-submit">Create Exam</button>
         </form>
     </div>
 </div>
 
 <script>
-    function openModal() { document.getElementById('createModal').style.display = 'block'; }
-    function closeModal() { document.getElementById('createModal').style.display = 'none'; }
+    function openModal() {
+        document.getElementById('createModal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+        document.getElementById('createModal').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+    // Close on backdrop click
+    document.getElementById('createModal').addEventListener('click', function (e) {
+        if (e.target === this) closeModal();
+    });
+    // Auto-open if form had errors
+    {% if form.errors %}
+    document.addEventListener('DOMContentLoaded', () => openModal());
+    {% endif %}
 </script>
 {% endblock %}

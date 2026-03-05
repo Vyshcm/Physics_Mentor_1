@@ -182,13 +182,52 @@ class RecordPaymentForm(forms.ModelForm):
         }
 
 class ExamCreationForm(forms.ModelForm):
+    CLASS_CHOICES = [
+        (10, 'Class 10'),
+        (11, 'Class 11'),
+        (12, 'Class 12'),
+    ]
+    target_class = forms.ChoiceField(
+        choices=[('', 'Select Target Class')] + CLASS_CHOICES,
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-input'}),
+        label="Target Class"
+    )
+
     class Meta:
         model = Exam
-        fields = ['title', 'total_marks']
+        fields = ['title', 'target_class', 'exam_date', 'start_time', 'duration_minutes', 'description', 'question_file', 'exam_link']
         widgets = {
-            'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Exam Title'}),
-            'total_marks': forms.NumberInput(attrs={'class': 'form-input', 'placeholder': 'Total Marks'}),
+            'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Exam Title / Chapter Name'}),
+            'exam_date': forms.DateInput(attrs={'class': 'form-input', 'type': 'date'}),
+            'start_time': forms.TimeInput(attrs={'class': 'form-input', 'type': 'time'}),
+            'duration_minutes': forms.NumberInput(attrs={'class': 'form-input', 'placeholder': 'Duration in minutes (optional)'}),
+            'description': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Short description / instructions (optional)', 'rows': 3}),
+            'question_file': forms.ClearableFileInput(attrs={'class': 'form-input', 'accept': '.pdf,.doc,.docx'}),
+            'exam_link': forms.URLInput(attrs={'class': 'form-input', 'placeholder': 'https://meet.google.com/...'}),
         }
+        labels = {
+            'exam_link': 'Exam Link (Join Exam / Camera URL)',
+            'question_file': 'Upload Question Paper (PDF/DOC)',
+        }
+
+    def clean_target_class(self):
+        val = self.cleaned_data.get('target_class')
+        if not val:
+            raise forms.ValidationError("Please select a target class.")
+        return int(val)
+
+    def clean_question_file(self):
+        f = self.cleaned_data.get('question_file')
+        if not f:
+            raise forms.ValidationError("Question paper file is required.")
+        return f
+
+    def clean_exam_link(self):
+        link = self.cleaned_data.get('exam_link', '').strip()
+        if not link:
+            raise forms.ValidationError("Exam link is required.")
+        return link
 
 class AdminReplyForm(forms.Form):
     admin_reply = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Write your reply here...', 'rows': 4}))

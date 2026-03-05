@@ -159,8 +159,22 @@ class QuizResult(models.Model):
         return f"{self.student.username} - {self.quiz.title}: {self.marks_obtained}/{self.quiz.total_marks}"
 
 class Exam(models.Model):
+    CLASS_CHOICES = [
+        (10, 'Class 10'),
+        (11, 'Class 11'),
+        (12, 'Class 12'),
+    ]
     title = models.CharField(max_length=200)
-    total_marks = models.IntegerField()
+    # Legacy field kept for ExamResult backward compatibility
+    total_marks = models.IntegerField(null=True, blank=True)
+    # New fields for the Examinations module
+    target_class = models.IntegerField(choices=CLASS_CHOICES, null=True, blank=True)
+    exam_date = models.DateField(null=True, blank=True)
+    start_time = models.TimeField(null=True, blank=True)
+    duration_minutes = models.IntegerField(null=True, blank=True)
+    description = models.TextField(blank=True)
+    question_file = models.FileField(upload_to='exams/', null=True, blank=True)
+    exam_link = models.URLField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
