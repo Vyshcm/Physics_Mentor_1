@@ -85,6 +85,11 @@
         font-size: 0.9rem;
     }
 
+    .required-asterisk {
+        color: #ef4444;
+        margin-left: 2px;
+    }
+
     .form-input,
     .form-textarea,
     select {
@@ -114,6 +119,28 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
+    }
+
+    .custom-file-label {
+        display: inline-block;
+        padding: 10px 16px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #f8fafc;
+        cursor: pointer;
+        max-width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-size: 0.95rem;
+        color: #1e293b;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .custom-file-label:hover {
+        background: #f1f5f9;
+        border-color: #3b82f6;
     }
 
     .btn-submit:hover {
@@ -269,8 +296,11 @@
                     {{ form.title }}
                 </div>
                 <div class="form-group">
-                    <label>Target Class (Optional)</label>
-                    {{ form.student_class }}
+                    <label>Target Class <span class="required-asterisk">*</span></label>
+                    {{ form.standard }}
+                    {% if form.standard.errors %}
+                    <div style="color: #ef4444; font-size: 0.8rem; margin-top: 5px;">{{ form.standard.errors }}</div>
+                    {% endif %}
                 </div>
                 <div class="form-group">
                     <label>Specific Student (Optional)</label>
@@ -282,8 +312,11 @@
                 {{ form.description }}
             </div>
             <div class="form-group">
-                <label>File (PDF, Doc, Image - Max 10MB)</label>
-                {{ form.file }}
+                <label>File (PDF, Doc, Image - Max 100MB)</label>
+                <div class="custom-file">
+                    {{ form.file }}
+                    <label for="fileInput" id="fileLabel" class="custom-file-label">Choose File</label>
+                </div>
                 {% if form.file.errors %}
                 <div style="color: #ef4444; font-size: 0.8rem; margin-top: 5px;">{{ form.file.errors }}</div>
                 {% endif %}
@@ -313,6 +346,8 @@
                     <td>
                         {% if note.assigned_student %}
                         <span class="target-badge badge-student">@{{ note.assigned_student.username }}</span>
+                        {% elif note.standard %}
+                        <span class="target-badge badge-class">Class: {{ note.standard }}</span>
                         {% elif note.student_class %}
                         <span class="target-badge badge-class">Class: {{ note.student_class }}</span>
                         {% else %}
@@ -372,5 +407,19 @@
             </tbody>
         </table>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const input = document.getElementById("fileInput");
+            const label = document.getElementById("fileLabel");
+
+            if (!input || !label) return;
+
+            input.addEventListener("change", function () {
+                const fileName = input.files && input.files.length > 0 ? input.files[0].name : "Choose File";
+                label.textContent = fileName;
+            });
+        });
+    </script>
 </div>
 {% endblock %}

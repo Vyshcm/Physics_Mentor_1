@@ -1,4 +1,5 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render, redirect, get_object_or_404
+import os
 from django.utils import timezone
 from datetime import timedelta
 from django.db import models
@@ -96,7 +97,8 @@ def dashboard(request):
         # AND status must be UPCOMING
         live_classes = LiveClass.objects.filter(
             models.Q(audience_type='ALL') | 
-            models.Q(audience_type='CLASS', standard=profile.standard) |
+            models.Q(target_class__isnull=True) |
+            models.Q(target_class=profile.standard) |
             models.Q(audience_type='STUDENTS', specific_students=request.user),
             status='UPCOMING',
             date__gte=timezone.now().date()
@@ -377,7 +379,8 @@ def parent_dashboard_view(request):
     # 8. Upcoming Live Classes for student
     live_classes = LiveClass.objects.filter(
         models.Q(audience_type='ALL') | 
-        models.Q(audience_type='CLASS', standard=student_profile.standard) |
+        models.Q(target_class__isnull=True) |
+        models.Q(target_class=student_profile.standard) |
         models.Q(audience_type='STUDENTS', specific_students=student),
         status='UPCOMING',
         date__gte=timezone.now().date()
@@ -886,15 +889,19 @@ def teacher_note_edit_view(request, note_id):
 
 @teacher_required
 def teacher_note_delete_view(request, note_id):
-    note = Note.objects.get(id=note_id)
+    note = get_object_or_404(Note, id=note_id)
     if request.method == "POST":
-        # Delete the file from storage
+        # Delete the file from storage if it exists
         if note.file:
-            if os.path.exists(note.file.path):
-                os.remove(note.file.path)
+            try:
+                if os.path.exists(note.file.path):
+                    os.remove(note.file.path)
+            except Exception as e:
+                # Log the error or handle it silently to ensure DB record is still deleted
+                print(f"Error deleting file: {e}")
+                
         note.delete()
         messages.success(request, "Note deleted successfully.")
-        return redirect('teacher_notes')
     return redirect('teacher_notes')
 
 @teacher_required
@@ -926,6 +933,26 @@ def teacher_live_classes_view(request):
 
     live_classes = LiveClass.objects.all().order_by('-date', '-time')
     return render(request, 'accounts/teacher_live_classes.html', {'live_classes': live_classes, 'form': form})
+
+def student_live_classes(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    profile = request.user.userprofile
+    sessions = LiveClass.objects.filter(
+        models.Q(audience_type='ALL') | 
+        models.Q(target_class__isnull=True) |
+        models.Q(target_class=profile.standard) |
+        models.Q(audience_type='STUDENTS', specific_students=request.user),
+        status='UPCOMING',
+        date__gte=timezone.now().date()
+    ).distinct().order_by('date', 'time')
+
+    return render(request, 'accounts/student_live_classes.html', {
+        'sessions': sessions,
+        'student_standard': profile.standard,
+        'profile': profile
+    })
 
 @login_required
 def student_assignments_view(request):
@@ -987,5 +1014,24 @@ def student_assignment_detail_view(request, assignment_id):
         'assignment': assignment,
         'submission': submission,
         'form': form,
+        'profile': profile
+    })
+
+@login_required
+def student_notes(request):
+    profile = request.user.userprofile
+    if profile.role != 'Student':
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+        
+    # Notes for student: Filter by standard
+    notes = Note.objects.filter(
+        models.Q(standard=profile.standard) | 
+        models.Q(assigned_student=request.user)
+    ).distinct().order_by('-created_at')
+    
+    return render(request, 'accounts/student_notes.html', {
+        'notes': notes,
+        'student_standard': profile.standard,
         'profile': profile
     })

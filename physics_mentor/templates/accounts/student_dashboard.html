@@ -365,7 +365,8 @@
 
     <div class="cards-grid {% if not is_paid %}unpaid-dashboard{% endif %}">
         <!-- Live Classes -->
-        <div class="dashboard-card" style="grid-column: span 1.5;">
+        <div class="dashboard-card" style="grid-column: span 1.5;"
+            onclick="window.location.href='{% url 'student_live_classes' %}';">
             <div class="card-icon icon-blue">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polygon points="23 7 16 12 23 17 23 7"></polygon>
@@ -394,6 +395,20 @@
         </div>
 
         <!-- Notes -->
+        {% if is_paid %}
+        <a href="{% url 'student_notes' %}" style="text-decoration: none; color: inherit; grid-column: span 1.5;">
+            <div class="dashboard-card">
+                <div class="card-icon icon-green">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                </div>
+                <h3>Study Materials & Notes</h3>
+                <p>Access notes and study materials shared by your teacher.</p>
+            </div>
+        </a>
+        {% else %}
         <div class="dashboard-card" style="grid-column: span 1.5;">
             <div class="card-icon icon-green">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -402,28 +417,9 @@
                 </svg>
             </div>
             <h3>Study Materials & Notes</h3>
-            <div style="margin-top: 10px; max-height: 200px; overflow-y: auto;">
-                {% for note in notes %}
-                <div
-                    style="padding: 10px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <div style="font-weight: 600; font-size: 0.9rem; color: #1e293b;">{{ note.title }}</div>
-                        <div style="font-size: 0.75rem; color: #94a3b8;">{{ note.created_at|date:"d M, Y" }}</div>
-                    </div>
-                    {% if is_paid %}
-                    <div style="display: flex; gap: 10px;">
-                        <a href="{{ note.file.url }}" target="_blank"
-                            style="color: #3b82f6; font-weight: 700; font-size: 0.8rem; text-decoration: none;">View</a>
-                        <a href="{{ note.file.url }}" download
-                            style="color: #10b981; font-weight: 700; font-size: 0.8rem; text-decoration: none;">Download</a>
-                    </div>
-                    {% endif %}
-                </div>
-                {% empty %}
-                <p style="font-size: 0.85rem; color: #94a3b8;">No notes available yet.</p>
-                {% endfor %}
-            </div>
+            <p>Access notes and study materials shared by your teacher.</p>
         </div>
+        {% endif %}
 
         <!-- Assignments -->
         {% if is_paid %}

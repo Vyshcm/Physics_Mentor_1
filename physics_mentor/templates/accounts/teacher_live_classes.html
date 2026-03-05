@@ -228,9 +228,10 @@
             </div>
 
             <div id="class_selection_div" class="form-group" style="display:none;">
-                <label>Target Class</label>
-                {{ form.student_class }}
-                <p style="font-size: 0.75rem; color: #64748b; margin-top: 5px;">e.g., 10th Standard</p>
+                <label>Select Class</label>
+                {{ form.target_class }}
+                <p style="font-size: 0.75rem; color: #64748b; margin-top: 5px;">Select the target class (10, 11, or 12)
+                </p>
             </div>
 
             <div id="student_selection_div" class="form-group" style="display:none;">
@@ -277,7 +278,7 @@
                     <td>
                         <span class="audience-badge">
                             {% if cls.audience_type == 'ALL' %}All Students
-                            {% elif cls.audience_type == 'CLASS' %}Class: {{ cls.student_class }}
+                            {% elif cls.audience_type == 'CLASS' %}Class: {{ cls.get_target_class_display }}
                             {% else %}{{ cls.specific_students.count }} Student(s)
                             {% endif %}
                         </span>

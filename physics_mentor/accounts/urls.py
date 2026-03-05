@@ -39,4 +39,6 @@ urlpatterns = [
     # Student Assignment URLs
     path('student/assignments/', views.student_assignments_view, name='student_assignments'),
     path('student/assignments/<int:assignment_id>/', views.student_assignment_detail_view, name='student_assignment_detail'),
+    path('student/live-classes/', views.student_live_classes, name='student_live_classes'),
+    path('student/notes/', views.student_notes, name='student_notes'),
 ]

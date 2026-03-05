@@ -67,6 +67,28 @@
         font-weight: 600;
         margin-left: 15px;
     }
+
+    .custom-file-label {
+        display: inline-block;
+        padding: 10px 16px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #f8fafc;
+        cursor: pointer;
+        max-width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-size: 0.95rem;
+        color: #1e293b;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .custom-file-label:hover {
+        background: #f1f5f9;
+        border-color: #3b82f6;
+    }
 </style>
 
 <div class="manage-container">
@@ -84,8 +106,11 @@
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div class="form-group">
-                    <label>Target Class (Optional)</label>
-                    {{ form.student_class }}
+                    <label>Target Class <span style="color: #ef4444;">*</span></label>
+                    {{ form.standard }}
+                    {% if form.standard.errors %}
+                    <div style="color: #ef4444; font-size: 0.8rem; margin-top: 5px;">{{ form.standard.errors }}</div>
+                    {% endif %}
                 </div>
                 <div class="form-group">
                     <label>Specific Student (Optional)</label>
@@ -101,7 +126,10 @@
                 <div style="margin-bottom: 10px; font-size: 0.85rem; color: #64748b;">
                     Current: {{ note.file.name|cut:"notes/" }}
                 </div>
-                {{ form.file }}
+                <div class="custom-file">
+                    {{ form.file }}
+                    <label for="fileInput" id="fileLabel" class="custom-file-label">Choose New File</label>
+                </div>
                 {% if form.file.errors %}
                 <div style="color: #ef4444; font-size: 0.8rem; margin-top: 5px;">{{ form.file.errors }}</div>
                 {% endif %}
@@ -112,5 +140,18 @@
             </div>
         </form>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const input = document.getElementById("fileInput");
+            const label = document.getElementById("fileLabel");
+
+            if (!input || !label) return;
+
+            input.addEventListener("change", function () {
+                const fileName = input.files && input.files.length > 0 ? input.files[0].name : "Choose New File";
+                label.textContent = fileName;
+            });
+        });
+    </script>
 </div>
 {% endblock %}

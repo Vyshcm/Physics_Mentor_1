@@ -194,6 +194,12 @@ class AdminReplyForm(forms.Form):
     admin_reply = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Write your reply here...', 'rows': 4}))
 
 class NoteForm(forms.ModelForm):
+    standard = forms.ChoiceField(
+        choices=[('', 'Select Class')] + UserProfile.STANDARD_CHOICES,
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-input'}),
+        label="Target Class"
+    )
     assigned_student = forms.ModelChoiceField(
         queryset=User.objects.filter(userprofile__role='Student'),
         required=False,
@@ -203,26 +209,30 @@ class NoteForm(forms.ModelForm):
 
     class Meta:
         model = Note
-        fields = ['title', 'description', 'file', 'student_class', 'standard', 'assigned_student']
+        fields = ['title', 'description', 'file', 'standard', 'assigned_student']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Note Title'}),
             'description': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Description...', 'rows': 3}),
-            'file': forms.ClearableFileInput(attrs={'class': 'form-input'}),
-            'student_class': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Target Class (e.g. 10th)'}),
-            'standard': forms.Select(attrs={'class': 'form-input'}),
+            'file': forms.ClearableFileInput(attrs={'class': 'form-input', 'id': 'fileInput', 'style': 'display: none;'}),
         }
 
     def clean_file(self):
         file = self.cleaned_data.get('file')
         if file:
-            if file.size > 10 * 1024 * 1024:  # 10MB
-                raise ValidationError("File size must be under 10MB.")
+            if file.size > 100 * 1024 * 1024:  # 100MB
+                raise ValidationError("File size must be under 100MB.")
         return file
 
 class LiveClassCreationForm(forms.ModelForm):
+    target_class = forms.ChoiceField(
+        choices=[('', 'Select Class'), (10, 'Class 10'), (11, 'Class 11'), (12, 'Class 12')],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-input', 'id': 'id_target_class_input'})
+    )
+
     class Meta:
         model = LiveClass
-        fields = ['title', 'description', 'date', 'time', 'duration', 'meeting_link', 'audience_type', 'standard', 'student_class', 'specific_students']
+        fields = ['title', 'description', 'date', 'time', 'duration', 'meeting_link', 'audience_type', 'target_class', 'specific_students']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Class Title'}),
             'description': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Description...', 'rows': 3}),
@@ -231,21 +241,26 @@ class LiveClassCreationForm(forms.ModelForm):
             'duration': forms.NumberInput(attrs={'class': 'form-input', 'placeholder': 'Duration (mins)'}),
             'meeting_link': forms.URLInput(attrs={'class': 'form-input', 'placeholder': 'https://zoom.us/j/...'}),
             'audience_type': forms.Select(attrs={'class': 'form-input', 'id': 'id_audience_type'}),
-            'standard': forms.Select(attrs={'class': 'form-input'}),
-            'student_class': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. 10th', 'id': 'id_student_class_input'}),
             'specific_students': forms.SelectMultiple(attrs={'class': 'form-input', 'id': 'id_specific_students_input'}),
         }
 
     def clean(self):
         cleaned_data = super().clean()
         audience_type = cleaned_data.get('audience_type')
-        student_class = cleaned_data.get('student_class')
+        target_class = cleaned_data.get('target_class')
         specific_students = cleaned_data.get('specific_students')
 
-        if audience_type == 'CLASS' and not student_class:
-            self.add_error('student_class', "Please specify the target class.")
-        
-        if audience_type == 'STUDENTS' and not specific_students:
-            self.add_error('specific_students', "Please select at least one student.")
+        if audience_type == 'CLASS':
+            if not target_class:
+                self.add_error('target_class', "Please select a class.")
+            # Clear other audience fields
+            cleaned_data['specific_students'] = []
+        elif audience_type == 'ALL':
+            cleaned_data['target_class'] = None
+            cleaned_data['specific_students'] = []
+        elif audience_type == 'STUDENTS':
+            if not specific_students:
+                self.add_error('specific_students', "Please select at least one student.")
+            cleaned_data['target_class'] = None
             
         return cleaned_data

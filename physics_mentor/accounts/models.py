@@ -202,7 +202,7 @@ class Note(models.Model):
     description = models.TextField(blank=True, null=True)
     file = models.FileField(upload_to='notes/')
     student_class = models.CharField(max_length=20, blank=True, null=True, help_text="Target class (Optional)")
-    standard = models.IntegerField(choices=UserProfile.STANDARD_CHOICES, null=True, blank=True)
+    standard = models.IntegerField(choices=UserProfile.STANDARD_CHOICES)
     assigned_student = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='personal_notes', help_text="Target specific student (Optional)")
     created_at = models.DateTimeField(auto_now_add=True)
     uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='uploaded_notes')
@@ -232,6 +232,7 @@ class LiveClass(models.Model):
     audience_type = models.CharField(max_length=20, choices=AUDIENCE_CHOICES, default='ALL')
     student_class = models.CharField(max_length=20, blank=True, null=True, help_text="Target class if Audience is 'Specific Class'")
     standard = models.IntegerField(choices=UserProfile.STANDARD_CHOICES, null=True, blank=True)
+    target_class = models.IntegerField(choices=[(10, 'Class 10'), (11, 'Class 11'), (12, 'Class 12')], null=True, blank=True)
     specific_students = models.ManyToManyField(User, blank=True, related_name='assigned_live_classes')
     
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='UPCOMING')
