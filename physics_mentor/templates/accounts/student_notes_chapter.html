@@ -58,38 +58,30 @@
     }
 
     .notes-container {
-        padding: 40px 5%;
-        width: 95%;
-        max-width: 1400px;
+        max-width: 1000px;
+        width: 100%;
         margin: 40px auto;
+        padding: 0 16px;
     }
 
     .note-card {
-        background: #ffffff;
-        border-radius: 14px;
-        padding: 26px 36px;
-        margin: 25px auto;
+        background: var(--white);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 20px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border: 2px solid #e4e4e4;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        transition: transform 0.2s, box-shadow 0.2s;
+        border-left: 4px solid var(--purple);
         width: 100%;
         box-sizing: border-box;
-        transition: all 0.25s ease;
     }
 
     .note-card:hover {
-        border-color: #2f6fed;
-        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
-    }
-
-    .note-card:hover .note-details h3 {
-        color: #2f6fed;
-    }
-
-    .note-card:hover .note-icon {
-        background: #2f6fed;
-        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
     }
 
     .note-info {
@@ -147,6 +139,7 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
+        flex-shrink: 0;
     }
 
     .btn-download:hover {
@@ -172,33 +165,65 @@
         <h1>Study Materials & Notes</h1>
         <p>Access materials shared by your teacher.</p>
     </div>
-    <a href="{% url 'dashboard' %}" class="btn-dashboard">
-        Dashboard
+    <a href="{% url 'student_notes' %}" class="btn-dashboard">
+        Back to Chapters
     </a>
 </div>
 
 <div class="notes-container">
-    {% if chapters %}
-    {% for ch in chapters %}
-    <a href="?chapter={{ ch.title|urlencode }}" class="note-card"
-        style="text-decoration: none; color: inherit; width: 100%; box-sizing: border-box;">
+    <h2 style="margin-bottom: 24px; color: #1e293b;">Chapter: {{ chapter_title }}</h2>
+    {% if notes %}
+    {% for note in notes %}
+    <div class="note-card">
         <div class="note-info">
             <div class="note-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
                 </svg>
             </div>
             <div class="note-details">
-                <h3>{{ ch.title }}</h3>
-                <p class="note-description">{{ ch.count }} material{{ ch.count|pluralize }}</p>
+                <h3>{{ note.title }}</h3>
+                {% if note.description %}
+                <p class="note-description">{{ note.description }}</p>
+                {% endif %}
+                <div class="note-meta">
+                    <div class="note-meta-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        {{ note.created_at|date:"d M, Y" }}
+                    </div>
+                    <div class="note-meta-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        {{ note.get_standard_display|default:profile.get_standard_display }}
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="btn-download" style="background-color: #f1f5f9; color: var(--purple);">
-            Open
-        </div>
-    </a>
+        <a href="{{ note.file.url }}" download target="_blank" class="btn-download">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Download
+        </a>
+    </div>
     {% endfor %}
     {% else %}
     <div class="empty-state">

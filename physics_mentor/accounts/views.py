@@ -1024,14 +1024,34 @@ def student_notes(request):
         messages.error(request, "Access denied.")
         return redirect('dashboard')
         
+    chapter_filter = request.GET.get('chapter')
+    
     # Notes for student: Filter by standard
-    notes = Note.objects.filter(
+    qs = Note.objects.filter(
         models.Q(standard=profile.standard) | 
         models.Q(assigned_student=request.user)
-    ).distinct().order_by('-created_at')
+    ).distinct()
     
-    return render(request, 'accounts/student_notes.html', {
-        'notes': notes,
-        'student_standard': profile.standard,
-        'profile': profile
-    })
+    if chapter_filter:
+        notes = qs.filter(title__iexact=chapter_filter).order_by('-created_at')
+        return render(request, 'accounts/student_notes_chapter.html', {
+            'chapter_title': chapter_filter,
+            'notes': notes,
+            'student_standard': profile.standard,
+            'profile': profile
+        })
+    else:
+        from django.db.models import Count
+        chapters_qs = qs.values('title').annotate(count=Count('id')).order_by('title')
+        chapters = []
+        for ch in chapters_qs:
+            chapters.append({
+                'title': ch['title'],
+                'count': ch['count']
+            })
+            
+        return render(request, 'accounts/student_notes.html', {
+            'chapters': chapters,
+            'student_standard': profile.standard,
+            'profile': profile
+        })
