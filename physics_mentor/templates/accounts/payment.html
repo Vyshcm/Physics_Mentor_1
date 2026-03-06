@@ -174,12 +174,11 @@
                         <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
                         <line x1="1" y1="10" x2="23" y2="10"></line>
                     </svg>
-                    Mock Payment (Bypass Real Gateway)
+                    Pay ₹1999 with Razorpay (Mock)
                 </button>
                 <p style="text-align: center; font-size: 0.8rem; color: #dc2626; margin-top: 10px;">
-                    * Note: To use the real Razorpay Window, please replace 'rzp_test_YOUR_KEY_HERE' in settings.py with
-                    your real Test Keys. Since keys are currently placeholders, this button simulates a successful
-                    payment.
+                    * Note: To use the real Razorpay Window, please replace the placeholder keys in your .env file with
+                    your real Razorpay Test Keys.
                 </p>
             </form>
             {% else %}
@@ -189,7 +188,7 @@
                     <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
                     <line x1="1" y1="10" x2="23" y2="10"></line>
                 </svg>
-                Pay Securely Now
+                Pay ₹1999 with Razorpay
             </button>
             <form name="razorpay-form" action="{% url 'payment_success' %}" method="POST">
                 {% csrf_token %}

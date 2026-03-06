@@ -127,9 +127,8 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # Razorpay Configuration
-# Replace these with your actual Razorpay Test or Live Keys
-RAZORPAY_KEY_ID = 'rzp_test_YOUR_KEY_HERE'
-RAZORPAY_KEY_SECRET = 'YOUR_SECRET_HERE'
+RAZORPAY_KEY_ID = os.getenv('RAZORPAY_KEY_ID', 'rzp_test_YOUR_KEY_HERE')
+RAZORPAY_KEY_SECRET = os.getenv('RAZORPAY_KEY_SECRET', 'YOUR_SECRET_HERE')
 
 # DeepSeek Configuration
 import os

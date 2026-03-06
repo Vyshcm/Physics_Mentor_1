@@ -88,18 +88,23 @@ class ParentMessage(models.Model):
 
 class Payment(models.Model):
     STATUS_CHOICES = [
+        ('pending', 'Pending'),
         ('paid', 'Paid'),
+        ('success', 'Success'),
         ('failed', 'Failed'),
         ('refunded', 'Refunded'),
     ]
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payments')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='paid')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    razorpay_order_id = models.CharField(max_length=100, null=True, blank=True)
+    razorpay_payment_id = models.CharField(max_length=100, null=True, blank=True)
+    razorpay_signature = models.CharField(max_length=255, null=True, blank=True)
     payment_date = models.DateTimeField(auto_now_add=True)
     expiry_date_after_payment = models.DateField(null=True, blank=True)
 
     def __str__(self):
-        return f"Payment of {self.amount} for {self.student.username} ({self.status})"
+        return f"Payment of {self.amount} by {self.student.username} - {self.status}"
 
 class Attendance(models.Model):
     STATUS_CHOICES = [

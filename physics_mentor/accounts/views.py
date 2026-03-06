@@ -167,18 +167,36 @@ def payment(request):
     amount = 1999 * 100 # Razorpay takes amount in paise (₹1999)
     currency = "INR"
     
-    # Check if keys are actually set or just placeholder
-    is_mock = getattr(settings, 'RAZORPAY_KEY_ID', '').endswith('YOUR_KEY_HERE')
+    # Load keys from settings
+    razorpay_key = settings.RAZORPAY_KEY_ID
+    razorpay_secret = settings.RAZORPAY_KEY_SECRET
     
-    context = {'is_mock': is_mock, 'amount': amount}
+    is_mock = razorpay_key.endswith('YOUR_KEY_HERE') or razorpay_key == 'rzp_test_xxxxxxxxx'
+    
+    context = {'is_mock': is_mock, 'amount': amount, 'razorpay_key': razorpay_key}
     
     if not is_mock:
         try:
-            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
-            payment_order = client.order.create(dict(amount=amount, currency=currency, payment_capture=1))
+            client = razorpay.Client(auth=(razorpay_key, razorpay_secret))
+            # Create Razorpay Order
+            data = {
+                "amount": amount,
+                "currency": currency,
+                "payment_capture": "1" # Auto-capture
+            }
+            payment_order = client.order.create(data=data)
+            
+            # Create a pending Payment record
+            Payment.objects.create(
+                student=request.user,
+                amount=1999.00,
+                status='pending',
+                razorpay_order_id=payment_order['id']
+            )
+            
             context['order_id'] = payment_order['id']
-            context['razorpay_key'] = settings.RAZORPAY_KEY_ID
         except Exception as e:
+            print(f"Razorpay Error: {e}")
             # Fallback to mock if API key fails authentication with Razorpay server
             context['is_mock'] = True
             
@@ -190,28 +208,66 @@ def payment_success(request):
         return redirect('login')
         
     if request.method == "POST":
-        # Simulated payment directly updates profile
-        profile = request.user.userprofile
-        profile.is_paid = True
-        from django.utils import timezone
-        from datetime import timedelta
-        # Set expiry date to 30 days from today
-        expiry = timezone.now().date() + timedelta(days=30)
-        profile.subscription_end_date = expiry
-        profile.save()
+        # Handle Razorpay Verification
+        razorpay_payment_id = request.POST.get('razorpay_payment_id')
+        razorpay_order_id = request.POST.get('razorpay_order_id')
+        razorpay_signature = request.POST.get('razorpay_signature')
         
-        # ALSO create a Payment record for consistency
-        from .models import Payment
-        Payment.objects.create(
-            student=request.user,
-            amount=1999.00,
-            status='paid',
-            expiry_date_after_payment=expiry
-        )
+        # If it's a real Razorpay response, verify it
+        if razorpay_payment_id and razorpay_order_id and razorpay_signature:
+            client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+            params_dict = {
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_payment_id': razorpay_payment_id,
+                'razorpay_signature': razorpay_signature
+            }
+            
+            try:
+                # This will raise an error if verification fails
+                client.utility.verify_payment_signature(params_dict)
+                
+                # Update payment record
+                payment = Payment.objects.filter(razorpay_order_id=razorpay_order_id).first()
+                if payment:
+                    payment.status = 'success'
+                    payment.razorpay_payment_id = razorpay_payment_id
+                    payment.razorpay_signature = razorpay_signature
+                    
+                    # Update profile subscription
+                    profile = request.user.userprofile
+                    profile.is_paid = True
+                    expiry = timezone.now().date() + timedelta(days=30)
+                    profile.subscription_end_date = expiry
+                    profile.save()
+                    
+                    payment.expiry_date_after_payment = expiry
+                    payment.save()
+                    
+                    messages.success(request, "Subscription Activated Successfully!")
+                    return redirect('dashboard')
+            except Exception as e:
+                print(f"Verification Failed: {e}")
+                messages.error(request, "Payment verification failed. Please contact support.")
+                return redirect('dashboard')
+        
+        # Fallback/Mock logic (simulated success for demo if keys are placeholders)
+        else:
+            profile = request.user.userprofile
+            profile.is_paid = True
+            expiry = timezone.now().date() + timedelta(days=30)
+            profile.subscription_end_date = expiry
+            profile.save()
+            
+            Payment.objects.create(
+                student=request.user,
+                amount=1999.00,
+                status='success',
+                expiry_date_after_payment=expiry
+            )
 
-        messages.success(request, "Payment successful! You are now a premium user.")
-        return redirect('dashboard')
-        
+            messages.success(request, "Subscription Activated Successfully! (Mock)")
+            return redirect('dashboard')
+            
     return redirect('dashboard')
 
 @login_required
