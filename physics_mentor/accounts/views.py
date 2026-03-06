@@ -249,7 +249,7 @@ def feedback_view(request):
 @login_required
 def doubt_sessions_view(request):
     if request.method == "POST":
-        form = DoubtForm(request.POST)
+        form = DoubtForm(request.POST, request.FILES)
         if form.is_valid():
             doubt = form.save(commit=False)
             doubt.student = request.user
@@ -672,16 +672,27 @@ def teacher_doubts_view(request):
     from django.utils import timezone
     
     if request.method == "POST":
+        form = AdminReplyForm(request.POST, request.FILES)
         doubt_id = request.POST.get('doubt_id')
-        reply_text = request.POST.get('admin_reply')
-        if doubt_id and reply_text:
-            doubt = Doubt.objects.get(id=doubt_id)
-            doubt.admin_reply = reply_text
+        if form.is_valid() and doubt_id:
+            doubt = get_object_or_404(Doubt, id=doubt_id)
+            doubt.admin_reply = form.cleaned_data['admin_reply']
+            if form.cleaned_data['admin_reply_attachment']:
+                doubt.admin_reply_attachment = form.cleaned_data['admin_reply_attachment']
             doubt.status = 'replied'
             doubt.replied_at = timezone.now()
             doubt.save()
             messages.success(request, f"Reply sent to {doubt.student.username}.")
             return redirect('teacher_doubts')
+        else:
+            if not doubt_id:
+                messages.error(request, "Doubt ID is missing.")
+            else:
+                for error in form.non_field_errors():
+                    messages.error(request, error)
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        messages.error(request, f"{field}: {error}")
 
     doubts = Doubt.objects.all().order_by('-created_at').select_related('student')
     form = AdminReplyForm()
@@ -739,6 +750,30 @@ def teacher_exam_submissions(request, exam_id):
         'exam': exam,
         'submissions': submissions
     })
+
+@teacher_required
+def grade_exam_submission(request, submission_id):
+    submission = get_object_or_404(ExamSubmission, id=submission_id)
+    if request.method == "POST":
+        marks = request.POST.get('marks_obtained')
+        total = request.POST.get('total_marks')
+        feedback = request.POST.get('feedback')
+        
+        if marks and total:
+            try:
+                submission.marks_obtained = float(marks)
+                submission.total_marks = float(total)
+                submission.teacher_feedback = feedback
+                submission.status = 'Graded'
+                submission.graded_at = timezone.now()
+                submission.save()
+                messages.success(request, f"Result published for {submission.student.username}")
+            except ValueError:
+                messages.error(request, "Invalid marks format.")
+        else:
+            messages.error(request, "Marks and Total Marks are required.")
+            
+    return redirect('teacher_exam_submissions', exam_id=submission.exam.id)
 
 @login_required
 def student_exams(request):
@@ -1362,6 +1397,7 @@ def student_quiz_result(request, quiz_id):
 
 @login_required
 def student_progress(request):
+    profile = request.user.userprofile
     # Only fetch submitted attempts
     attempts = QuizAttempt.objects.filter(student=request.user, submitted=True).select_related('quiz').order_by('-end_time')
     
@@ -1389,16 +1425,56 @@ def student_progress(request):
                 'percentage': f"{int(percentage)}%"
             })
             
-        avg_score = int(total_percentage / total_quizzes)
-        best_score = int(best_score)
+    avg_score = int(total_percentage / total_quizzes) if total_quizzes > 0 else 0
+    best_score = int(best_score)
+    
+    # Prepare chart data in chronological order
+    for attempt in reversed(attempts):
+        chart_labels.append(attempt.quiz.title)
+        percentage = (attempt.score / attempt.quiz.total_marks * 100) if attempt.quiz.total_marks > 0 else 0
+        chart_data.append(int(percentage))
+        chart_marks.append(attempt.score)
+        chart_totals.append(attempt.quiz.total_marks)
+
+    # ─────────────────────────────────────────────────────────
+    # EXAM ANALYTICS
+    # ─────────────────────────────────────────────────────────
+    exam_subs = ExamSubmission.objects.filter(student=request.user, status='Graded').select_related('exam').order_by('-graded_at')
+    
+    total_exams = exam_subs.count()
+    exam_avg = 0
+    exam_best = 0
+    exam_labels = []
+    exam_data = [] # marks obtained
+    exam_marks_list = []
+    exam_totals_list = []
+    exam_history = []
+    
+    if total_exams > 0:
+        total_exam_percentage = 0
+        for sub in exam_subs:
+            percentage = (sub.marks_obtained / sub.total_marks * 100) if sub.total_marks > 0 else 0
+            total_exam_percentage += percentage
+            if percentage > exam_best:
+                exam_best = percentage
+                
+            exam_history.append({
+                'title': sub.exam.title,
+                'date': sub.graded_at.strftime('%d %b %Y'),
+                'marks': f"{sub.marks_obtained}/{sub.total_marks}",
+                'percentage': f"{int(percentage)}%",
+                'feedback': sub.teacher_feedback
+            })
+            
+        exam_avg = int(total_exam_percentage / total_exams)
+        exam_best = int(exam_best)
         
-        # Prepare chart data in chronological order
-        for attempt in reversed(attempts):
-            chart_labels.append(attempt.quiz.title)
-            percentage = (attempt.score / attempt.quiz.total_marks * 100) if attempt.quiz.total_marks > 0 else 0
-            chart_data.append(int(percentage))
-            chart_marks.append(attempt.score)
-            chart_totals.append(attempt.quiz.total_marks)
+        # Chronological chart data
+        for sub in reversed(exam_subs):
+            exam_labels.append(sub.exam.title)
+            exam_data.append(sub.marks_obtained)
+            exam_marks_list.append(sub.marks_obtained)
+            exam_totals_list.append(sub.total_marks)
 
     context = {
         'total_quizzes': total_quizzes,
@@ -1411,6 +1487,17 @@ def student_progress(request):
         'quiz_marks_json': json.dumps(chart_marks),
         'quiz_totals_json': json.dumps(chart_totals),
         'history': history,
-        'active_tab': 'progress' # For sidebar highlighting if applicable
+        
+        # Exam Context
+        'total_exams': total_exams,
+        'exam_avg': exam_avg,
+        'exam_best': exam_best,
+        'exam_labels_json': json.dumps(exam_labels),
+        'exam_marks_json': json.dumps(exam_marks_list),
+        'exam_totals_json': json.dumps(exam_totals_list),
+        'exam_history': exam_history,
+        
+        'active_tab': 'progress',
+        'profile': profile
     }
     return render(request, 'accounts/student_progress.html', context)

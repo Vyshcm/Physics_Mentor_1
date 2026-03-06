@@ -47,7 +47,9 @@ class Doubt(models.Model):
     title = models.CharField(max_length=200, blank=True)
     question = models.TextField()
     admin_reply = models.TextField(blank=True, null=True)
+    admin_reply_attachment = models.FileField(upload_to='doubt_replies/', null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new')
+    file = models.FileField(upload_to='doubts/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     replied_at = models.DateTimeField(blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -219,10 +221,21 @@ class ExamResult(models.Model):
         return f"{self.student.username} - {self.exam.title}: {self.marks_obtained}/{self.exam.total_marks}"
 
 class ExamSubmission(models.Model):
+    STATUS_CHOICES = [
+        ('Submitted', 'Submitted'),
+        ('Graded', 'Graded'),
+    ]
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='submissions')
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='exam_submissions')
     answer_file = models.FileField(upload_to='exam_submissions/')
     submitted_at = models.DateTimeField(auto_now=True)
+    
+    # Grading fields
+    marks_obtained = models.FloatField(null=True, blank=True)
+    total_marks = models.FloatField(null=True, blank=True)
+    teacher_feedback = models.TextField(null=True, blank=True)
+    graded_at = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Submitted')
 
     class Meta:
         unique_together = ('exam', 'student')

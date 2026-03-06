@@ -87,11 +87,27 @@ class FeedbackForm(forms.ModelForm):
 class DoubtForm(forms.ModelForm):
     class Meta:
         model = Doubt
-        fields = ['title', 'question']
+        fields = ['title', 'question', 'file']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Topic (Optional)'}),
             'question': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'What is your doubt?', 'rows': 5}),
+            'file': forms.ClearableFileInput(attrs={'class': 'form-input', 'id': 'doubtFileInput', 'style': 'display: none;', 'accept': '.jpg,.jpeg,.png,.pdf'}),
         }
+
+    def clean_file(self):
+        file = self.cleaned_data.get('file')
+        if file:
+            # Check file size (50MB limit)
+            if file.size > 50 * 1024 * 1024:
+                raise ValidationError("File size must be under 50MB.")
+            
+            # Check file extension
+            import os
+            ext = os.path.splitext(file.name)[1].lower()
+            allowed_extensions = ['.jpg', '.jpeg', '.png', '.pdf']
+            if ext not in allowed_extensions:
+                raise ValidationError("Only JPG, PNG, and PDF files are allowed.")
+        return file
 
 class StudentCreationForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-input', 'placeholder': 'Password'}))
@@ -246,7 +262,38 @@ class ExamCreationForm(forms.ModelForm):
         return link
 
 class AdminReplyForm(forms.Form):
-    admin_reply = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Write your reply here...', 'rows': 4}))
+    admin_reply = forms.CharField(
+        widget=forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Write your reply here...', 'rows': 4}),
+        required=False
+    )
+    admin_reply_attachment = forms.FileField(
+        required=False,
+        widget=forms.ClearableFileInput(attrs={'class': 'form-input', 'accept': '.pdf,.jpg,.jpeg,.png,.doc,.docx'})
+    )
+
+    def clean_admin_reply_attachment(self):
+        file = self.cleaned_data.get('admin_reply_attachment')
+        if file:
+            # Check file size (100MB limit)
+            if file.size > 100 * 1024 * 1024:
+                raise ValidationError("File size must be under 100MB.")
+            
+            # Check file extension
+            import os
+            ext = os.path.splitext(file.name)[1].lower()
+            allowed_extensions = ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx']
+            if ext not in allowed_extensions:
+                raise ValidationError("Allowed types: PDF, JPG, PNG, DOC, DOCX")
+        return file
+
+    def clean(self):
+        cleaned_data = super().clean()
+        admin_reply = cleaned_data.get('admin_reply')
+        admin_reply_attachment = cleaned_data.get('admin_reply_attachment')
+
+        if not admin_reply and not admin_reply_attachment:
+            raise ValidationError("Please provide either a reply message or an attachment.")
+        return cleaned_data
 
 class NoteForm(forms.ModelForm):
     standard = forms.ChoiceField(

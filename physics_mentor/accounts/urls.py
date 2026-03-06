@@ -27,6 +27,7 @@ urlpatterns = [
     path('teacher/quizzes/<int:quiz_id>/toggle-publish/', views.teacher_quiz_toggle_publish, name='teacher_quiz_toggle_publish'),
     path('teacher/exams/', views.teacher_exams_view, name='teacher_exams'),
     path('teacher/exams/<int:exam_id>/submissions/', views.teacher_exam_submissions, name='teacher_exam_submissions'),
+    path('teacher/exams/submission/<int:submission_id>/grade/', views.grade_exam_submission, name='grade_exam_submission'),
     path('teacher/payments/', views.teacher_payments_view, name='teacher_payments'),
     path('teacher/doubts/', views.teacher_doubts_view, name='teacher_doubts'),
     path('teacher/parent-messages/', views.teacher_parent_messages_view, name='teacher_parent_messages'),

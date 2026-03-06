@@ -249,8 +249,13 @@
                 {% else %}
                 <div style="color: #2f855a; font-weight: 700; font-size: 1.1rem;">Submitted</div>
                 {% endif %}
-                <div style="font-size: 0.8rem; color: #718096; margin-top: 4px;">At: {{ submission.submitted_at|date:"M
-                    d, H:i" }}</div>
+                <div style="font-size: 0.8rem; color: #718096; margin-top: 4px;">
+                    {% if submission.submitted_at %}
+                    At: {{ submission.submitted_at|date:"M d, H:i" }}
+                    {% else %}
+                    At: Not submitted yet
+                    {% endif %}
+                </div>
 
                 {% if submission.file %}
                 <div class="current-submission">
