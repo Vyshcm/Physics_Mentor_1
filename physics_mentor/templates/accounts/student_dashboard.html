@@ -133,13 +133,19 @@
         padding: 24px;
         display: flex;
         flex-direction: column;
+        border: 2px solid #c9def7;
+        /* Soft colored border */
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
-        transition: transform 0.3s, box-shadow 0.3s;
+        transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
     }
 
-    .dashboard-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.05);
+    .dashboard-card:hover,
+    .dashboard-card:active {
+        border-color: #4fd1c5;
+        /* Highlight color */
+        transform: translateY(-3px);
+        /* Slightly lift the card */
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
         cursor: pointer;
     }
 
@@ -519,7 +525,7 @@
 
         <!-- Marks & Progress -->
         {% if is_paid %}
-        <a href="#" style="text-decoration: none; color: inherit;">
+        <a href="{% url 'student_progress' %}" style="text-decoration: none; color: inherit;">
             <div class="dashboard-card">
                 <div class="card-icon icon-deepblue">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"

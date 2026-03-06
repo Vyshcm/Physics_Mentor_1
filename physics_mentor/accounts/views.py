@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 import os
+import json
 from django.utils import timezone
 from datetime import timedelta
 from django.db import models
@@ -1358,3 +1359,58 @@ def student_quiz_result(request, quiz_id):
         'review_data': review_data,
         'profile': profile
     })
+
+@login_required
+def student_progress(request):
+    # Only fetch submitted attempts
+    attempts = QuizAttempt.objects.filter(student=request.user, submitted=True).select_related('quiz').order_by('-end_time')
+    
+    total_quizzes = attempts.count()
+    avg_score = 0
+    best_score = 0
+    chart_labels = []
+    chart_data = []
+    chart_marks = []
+    chart_totals = []
+    history = []
+    
+    if total_quizzes > 0:
+        total_percentage = 0
+        for attempt in attempts:
+            percentage = (attempt.score / attempt.quiz.total_marks * 100) if attempt.quiz.total_marks > 0 else 0
+            total_percentage += percentage
+            if percentage > best_score:
+                best_score = percentage
+            
+            history.append({
+                'title': attempt.quiz.title,
+                'date': attempt.end_time.strftime('%d %b') if attempt.end_time else attempt.created_at.strftime('%d %b'),
+                'marks': f"{attempt.score}/{attempt.quiz.total_marks}",
+                'percentage': f"{int(percentage)}%"
+            })
+            
+        avg_score = int(total_percentage / total_quizzes)
+        best_score = int(best_score)
+        
+        # Prepare chart data in chronological order
+        for attempt in reversed(attempts):
+            chart_labels.append(attempt.quiz.title)
+            percentage = (attempt.score / attempt.quiz.total_marks * 100) if attempt.quiz.total_marks > 0 else 0
+            chart_data.append(int(percentage))
+            chart_marks.append(attempt.score)
+            chart_totals.append(attempt.quiz.total_marks)
+
+    context = {
+        'total_quizzes': total_quizzes,
+        'avg_score': avg_score,
+        'best_score': best_score,
+        'chart_labels': chart_labels,
+        'chart_data': chart_data,
+        'quiz_labels_json': json.dumps(chart_labels),
+        'quiz_percentages_json': json.dumps(chart_data),
+        'quiz_marks_json': json.dumps(chart_marks),
+        'quiz_totals_json': json.dumps(chart_totals),
+        'history': history,
+        'active_tab': 'progress' # For sidebar highlighting if applicable
+    }
+    return render(request, 'accounts/student_progress.html', context)

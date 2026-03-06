@@ -51,4 +51,5 @@ urlpatterns = [
     path('student/quizzes/<int:quiz_id>/start/', views.student_quiz_start, name='student_quiz_start'),
     path('student/quizzes/<int:quiz_id>/submit/', views.student_quiz_submit, name='student_quiz_submit'),
     path('student/quizzes/<int:quiz_id>/result/', views.student_quiz_result, name='student_quiz_result'),
+    path('student/progress/', views.student_progress, name='student_progress'),
 ]
