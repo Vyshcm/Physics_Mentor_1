@@ -122,6 +122,7 @@ class Quiz(models.Model):
     description = models.TextField(blank=True, null=True)
     total_marks = models.IntegerField()
     duration_minutes = models.IntegerField(default=30)
+    start_time = models.DateTimeField(null=True, blank=True)
     due_date = models.DateTimeField(null=True, blank=True)
     standard = models.IntegerField(choices=UserProfile.STANDARD_CHOICES, null=True, blank=True)
     is_published = models.BooleanField(default=False)
@@ -162,16 +163,28 @@ class QuizAttempt(models.Model):
     """Stores each student's submitted answers per quiz for scoring review."""
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='quiz_attempts')
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='attempts')
-    # answers stored as {str(question_id): "A"|"B"|"C"|"D"}
-    answers = models.JSONField(default=dict)
+    start_time = models.DateTimeField(null=True, blank=True)
+    end_time = models.DateTimeField(null=True, blank=True)
     score = models.IntegerField(null=True, blank=True)
-    submitted_at = models.DateTimeField(auto_now_add=True)
+    submitted = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ('student', 'quiz')
 
     def __str__(self):
-        return f"{self.student.username} attempt on {self.quiz.title}"
+        return f"{self.student.username} - {self.quiz.title}"
+
+class QuizAnswer(models.Model):
+    attempt = models.ForeignKey(QuizAttempt, on_delete=models.CASCADE, related_name='answers_details')
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    selected_option = models.CharField(max_length=1, null=True, blank=True)
+    is_correct = models.BooleanField(default=False)
+    marked_for_review = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.attempt.student.username} - {self.question.id}"
 
 
 class Exam(models.Model):

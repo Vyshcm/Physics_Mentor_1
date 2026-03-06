@@ -45,7 +45,10 @@ urlpatterns = [
     path('student/attendance/', views.student_attendance, name='student_attendance'),
     path('student/exams/', views.student_exams, name='student_exams'),
     path('student/exams/<int:exam_id>/upload/', views.upload_exam_submission, name='upload_exam_submission'),
+    # Student Quiz URLs
     path('student/quizzes/', views.student_quizzes, name='student_quizzes'),
-    path('student/quiz/<int:quiz_id>/', views.student_quiz_attempt, name='student_quiz_attempt'),
-    path('student/quiz/<int:quiz_id>/result/', views.student_quiz_result, name='student_quiz_result'),
+    path('student/quizzes/<int:quiz_id>/', views.student_quiz_instructions, name='student_quiz_instructions'),
+    path('student/quizzes/<int:quiz_id>/start/', views.student_quiz_start, name='student_quiz_start'),
+    path('student/quizzes/<int:quiz_id>/submit/', views.student_quiz_submit, name='student_quiz_submit'),
+    path('student/quizzes/<int:quiz_id>/result/', views.student_quiz_result, name='student_quiz_result'),
 ]

@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.models import User
-from .models import UserProfile, Feedback, Doubt, ParentProfile, ParentMessage, Payment, Attendance, Quiz, QuizResult, QuizAttempt, Exam, ExamResult, Assignment, AssignmentSubmission, Question, Note, LiveClass, ExamSubmission
+from .models import UserProfile, Feedback, Doubt, ParentProfile, ParentMessage, Payment, Attendance, Quiz, QuizResult, QuizAttempt, QuizAnswer, Exam, ExamResult, Assignment, AssignmentSubmission, Question, Note, LiveClass, ExamSubmission
 
 from django.db import IntegrityError
 
@@ -1169,15 +1169,33 @@ def student_quizzes(request):
         return redirect('dashboard')
         
     quizzes = Quiz.objects.filter(standard=profile.standard, is_published=True).order_by('-created_at')
-    # Filter out quizzes already attempted if needed, but for now we show all and handle redirection in attempt view
     
+    # Process each quiz to determine status
+    now = timezone.now()
+    for quiz in quizzes:
+        # Check if already submitted
+        attempt = QuizAttempt.objects.filter(student=request.user, quiz=quiz, submitted=True).first()
+        if attempt:
+            quiz.status_text = "Completed"
+            quiz.status_class = "status-completed"
+        elif quiz.start_time and now < quiz.start_time:
+            quiz.status_text = "Upcoming"
+            quiz.status_class = "status-upcoming"
+            quiz.available_at = quiz.start_time.strftime("%I:%M %p")
+        elif quiz.due_date and now > quiz.due_date:
+            quiz.status_text = "Expired"
+            quiz.status_class = "status-expired"
+        else:
+            quiz.status_text = "Available"
+            quiz.status_class = "status-available"
+            
     return render(request, 'accounts/student_quizzes.html', {
         'quizzes': quizzes,
         'profile': profile
     })
 
 @login_required
-def student_quiz_attempt(request, quiz_id):
+def student_quiz_instructions(request, quiz_id):
     profile = request.user.userprofile
     if profile.role != 'Student':
         messages.error(request, "Access denied.")
@@ -1185,70 +1203,158 @@ def student_quiz_attempt(request, quiz_id):
         
     quiz = get_object_or_404(Quiz, id=quiz_id, standard=profile.standard, is_published=True)
     
-    # Check if a result already exists to prevent retakes if desired, or just show previous result
-    existing_result = QuizResult.objects.filter(student=request.user, quiz=quiz).first()
-    if existing_result:
-        # Redirect to result page if already taken
+    # Check if already submitted
+    existing_attempt = QuizAttempt.objects.filter(student=request.user, quiz=quiz, submitted=True).first()
+    if existing_attempt:
         return redirect('student_quiz_result', quiz_id=quiz.id)
-
-    if request.method == "POST":
-        score = 0
-        questions = quiz.questions.all()
-        answers = {}
         
-        for q in questions:
-            selected_option = request.POST.get(f'question_{q.id}')
-            answers[str(q.id)] = selected_option
-            if selected_option == q.correct_option:
-                score += q.marks
-        
-        # Save Attempt
-        QuizAttempt.objects.create(
-            student=request.user,
-            quiz=quiz,
-            answers=answers,
-            score=score
-        )
-        
-        # Save Result
-        QuizResult.objects.create(
-            student=request.user,
-            quiz=quiz,
-            marks_obtained=score
-        )
-        messages.success(request, f"Quiz submitted successfully! You scored {score}/{quiz.total_marks}")
-        return redirect('student_quiz_result', quiz_id=quiz.id)
-
-    questions = quiz.questions.all()
-    return render(request, 'accounts/student_quiz_attempt.html', {
+    return render(request, 'accounts/student_quiz_instructions.html', {
         'quiz': quiz,
-        'questions': questions,
         'profile': profile
     })
 
 @login_required
-def student_quiz_result(request, quiz_id):
+def student_quiz_start(request, quiz_id):
     profile = request.user.userprofile
     if profile.role != 'Student':
         messages.error(request, "Access denied.")
         return redirect('dashboard')
         
+    quiz = get_object_or_404(Quiz, id=quiz_id, standard=profile.standard, is_published=True)
+    
+    # Backend Safety Check: Start Time
+    if quiz.start_time and timezone.now() < quiz.start_time:
+        messages.error(request, f"Quiz will start at {quiz.start_time.strftime('%I:%M %p')}.")
+        return redirect('student_quizzes')
+
+    # Check if already submitted
+    existing_attempt = QuizAttempt.objects.filter(student=request.user, quiz=quiz, submitted=True).first()
+    if existing_attempt:
+        return redirect('student_quiz_result', quiz_id=quiz.id)
+        
+    # Get or create attempt
+    attempt, created = QuizAttempt.objects.get_or_create(
+        student=request.user,
+        quiz=quiz,
+        defaults={'start_time': timezone.now()}
+    )
+    
+    if not attempt.start_time:
+        attempt.start_time = timezone.now()
+        attempt.save()
+        
+    questions = quiz.questions.all().order_by('id')
+    
+    return render(request, 'accounts/student_quiz_attempt.html', {
+        'quiz': quiz,
+        'questions': questions,
+        'attempt': attempt,
+        'profile': profile
+    })
+
+@login_required
+def student_quiz_submit(request, quiz_id):
+    if request.method != "POST":
+        return redirect('student_quizzes')
+        
+    profile = request.user.userprofile
+    quiz = get_object_or_404(Quiz, id=quiz_id, standard=profile.standard)
+    attempt = get_object_or_404(QuizAttempt, student=request.user, quiz=quiz)
+    
+    if attempt.submitted:
+        return redirect('student_quiz_result', quiz_id=quiz.id)
+        
+    questions = quiz.questions.all()
+    score = 0
+    attempted_count = 0
+    
+    for q in questions:
+        selected_option = request.POST.get(f'question_{q.id}')
+        is_correct = False
+        if selected_option:
+            attempted_count += 1
+            # DIRECT COMPARISON with teacher's saved correct_option
+            is_correct = (selected_option == q.correct_option)
+            if is_correct:
+                score += q.marks
+            
+        QuizAnswer.objects.update_or_create(
+            attempt=attempt,
+            question=q,
+            defaults={
+                'selected_option': selected_option,
+                'is_correct': is_correct,
+                'marked_for_review': request.POST.get(f'mark_{q.id}') == 'true'
+            }
+        )
+        
+    attempt.score = score
+    attempt.submitted = True
+    attempt.end_time = timezone.now()
+    attempt.save()
+    
+    # Update/Create QuizResult for overall performance tracking
+    QuizResult.objects.update_or_create(
+        student=request.user,
+        quiz=quiz,
+        defaults={'marks_obtained': score}
+    )
+    
+    messages.success(request, "Quiz submitted successfully!")
+    return redirect('student_quiz_result', quiz_id=quiz.id)
+
+@login_required
+def student_quiz_result(request, quiz_id):
+    profile = request.user.userprofile
     quiz = get_object_or_404(Quiz, id=quiz_id)
     attempt = get_object_or_404(QuizAttempt, student=request.user, quiz=quiz)
-    result = get_object_or_404(QuizResult, student=request.user, quiz=quiz)
     
-    questions_data = []
-    for q in quiz.questions.all():
-        selected = attempt.answers.get(str(q.id))
-        questions_data.append({
-            'question': q,
-            'selected': selected,
-            'is_correct': selected == q.correct_option
+    # Calculate results
+    total_questions = quiz.questions.count()
+    answers = QuizAnswer.objects.filter(attempt=attempt).select_related('question')
+    
+    attempted_count = answers.filter(selected_option__isnull=False).exclude(selected_option='').count()
+    skipped_count = total_questions - attempted_count
+    
+    # Accurate marks calculation based on questions
+    total_possible_marks = quiz.questions.aggregate(total=models.Sum('marks'))['total'] or 0
+    
+    # Percentage calculation
+    percentage = 0
+    if total_possible_marks > 0:
+        percentage = int((attempt.score / total_possible_marks) * 100)
+    
+    # Prepare detailed review data
+    review_data = []
+    for ans in answers:
+        q = ans.question
+        selected_text = "Not Answered"
+        correct_text = ""
+        
+        if ans.selected_option == 'A': selected_text = q.option_a
+        elif ans.selected_option == 'B': selected_text = q.option_b
+        elif ans.selected_option == 'C': selected_text = q.option_c
+        elif ans.selected_option == 'D': selected_text = q.option_d
+        
+        if q.correct_option == 'A': correct_text = q.option_a
+        elif q.correct_option == 'B': correct_text = q.option_b
+        elif q.correct_option == 'C': correct_text = q.option_c
+        elif q.correct_option == 'D': correct_text = q.option_d
+        
+        review_data.append({
+            'question_text': q.text,
+            'selected_answer_text': selected_text,
+            'correct_answer_text': correct_text,
+            'is_correct': ans.is_correct
         })
-
+    
     return render(request, 'accounts/student_quiz_result.html', {
         'quiz': quiz,
-        'result': result,
-        'questions_data': questions_data,
+        'attempt': attempt,
+        'percentage': percentage,
+        'attempted_count': attempted_count,
+        'skipped_count': skipped_count,
+        'total_marks': total_possible_marks,
+        'review_data': review_data,
         'profile': profile
     })

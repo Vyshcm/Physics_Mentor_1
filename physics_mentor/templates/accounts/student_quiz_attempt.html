@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<!-- MathJax Configuration — loads ONCE, renders LaTeX in question + options -->
+<!-- MathJax Configuration -->
 <script>
     window.MathJax = {
         tex: {
@@ -10,343 +10,666 @@
             displayMath: [['\\[', '\\]'], ['$$', '$$']],
             processEscapes: true
         },
-        options: {
-            skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-        }
+        options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre'] }
     };
 </script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
 <style>
-    .quiz-attempt-container {
-        max-width: 860px;
-        margin: 0 auto;
-        padding: 30px 20px 60px;
+    :root {
+        --primary-teal: #33c1a8;
+        --dark-navy: #0f1c3f;
+        --light-bg: #f8f9fc;
+        --border-color: #e2e8f0;
+        --success-green: #10b981;
+        --warning-orange: #f59e0b;
+        --text-muted: #64748b;
     }
 
-    /* Header bar */
-    .quiz-header {
-        background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
-        color: white;
-        border-radius: 14px;
-        padding: 24px 30px;
-        margin-bottom: 30px;
+    body {
+        background-color: var(--light-bg);
+    }
+
+    .quiz-layout {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 20px;
+        max-width: 1400px;
+        margin: 20px auto;
+        padding: 0 20px;
+        height: calc(100vh - 120px);
+    }
+
+    /* Left Column: Question Area */
+    .question-section {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .question-header {
+        padding: 20px 30px;
+        border-bottom: 1px solid var(--border-color);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        flex-wrap: wrap;
-        gap: 12px;
     }
 
-    .quiz-header h1 {
-        font-size: 1.5rem;
+    .question-header h2 {
+        font-size: 1rem;
+        color: var(--text-muted);
         margin: 0;
     }
 
-    .quiz-meta-badges {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-
-    .badge {
-        background: rgba(255, 255, 255, 0.18);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+    .marks-badge {
+        background: #f1f5f9;
+        color: var(--primary-teal);
+        padding: 4px 12px;
         border-radius: 20px;
-        padding: 5px 14px;
         font-size: 0.85rem;
         font-weight: 600;
-    }
-
-    /* Question card */
-    .question-card {
-        background: #fff;
         border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 28px 30px;
-        margin-bottom: 22px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     }
 
-    .question-number {
-        font-size: 0.78rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: #2563eb;
-        margin-bottom: 10px;
+    .question-body {
+        padding: 40px;
+        flex-grow: 1;
+        overflow-y: auto;
     }
 
     .question-text {
-        font-size: 1.05rem;
-        color: #1e293b;
+        font-size: 1.25rem;
         font-weight: 600;
-        line-height: 1.65;
-        margin-bottom: 20px;
+        color: var(--dark-navy);
+        margin-bottom: 30px;
+        line-height: 1.6;
     }
 
-    /* Options */
-    .options-list {
+    .options-container {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 15px;
     }
 
-    .option-label {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        padding: 12px 16px;
-        border: 2px solid #e2e8f0;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.18s ease;
-        font-size: 0.98rem;
-        color: #334155;
-        line-height: 1.5;
-        user-select: none;
-    }
-
-    .option-label:hover {
-        border-color: #2563eb;
-        background: #eff6ff;
-    }
-
-    .option-label input[type="radio"] {
-        display: none;
-    }
-
-    .option-label input[type="radio"]:checked~.option-bubble {
-        background: #2563eb;
-        border-color: #2563eb;
-        color: white;
-    }
-
-    .option-label:has(input:checked) {
-        border-color: #2563eb;
-        background: #eff6ff;
-        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-    }
-
-    .option-bubble {
-        min-width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        border: 2px solid #cbd5e1;
+    .option-box {
         display: flex;
         align-items: center;
+        padding: 18px 25px;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+    }
+
+    .option-box:hover {
+        background: #f8fafc;
+        border-color: var(--primary-teal);
+    }
+
+    .option-box.selected {
+        background: #f0fdfa;
+        border-color: var(--primary-teal);
+        border-width: 2px;
+    }
+
+    .option-letter {
+        width: 35px;
+        height: 35px;
+        background: #f1f5f9;
+        border-radius: 8px;
+        display: flex;
         justify-content: center;
+        align-items: center;
         font-weight: 700;
-        font-size: 0.85rem;
-        color: #64748b;
-        flex-shrink: 0;
-        transition: all 0.18s ease;
+        color: var(--text-muted);
+        margin-right: 20px;
+        transition: all 0.2s;
+    }
+
+    .option-box.selected .option-letter {
+        background: var(--primary-teal);
+        color: white;
     }
 
     .option-text {
-        flex: 1;
-        padding-top: 4px;
+        font-size: 1rem;
+        color: var(--dark-navy);
     }
 
-    /* Progress bar */
-    .progress-area {
+    .question-footer {
+        padding: 20px 30px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #fdfdfd;
+    }
+
+    /* Right Column: Sidebar */
+    .sidebar-section {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .sidebar-card {
         background: white;
         border-radius: 12px;
-        padding: 16px 20px;
-        margin-bottom: 24px;
-        border: 1px solid #e2e8f0;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+    }
+
+    .timer-display {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--dark-navy);
+        font-family: 'Courier New', Courier, monospace;
+    }
+
+    .timer-label {
+        text-align: center;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .palette-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .palette-btn {
+        aspect-ratio: 1;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        background: #f8fafc;
+        color: var(--text-muted);
+        font-weight: 700;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .palette-btn:hover {
+        border-color: var(--primary-teal);
+    }
+
+    .palette-btn.active {
+        border-color: var(--primary-teal);
+        border-width: 2px;
+        box-shadow: 0 0 0 2px rgba(51, 193, 168, 0.1);
+    }
+
+    .palette-btn.answered {
+        background: var(--success-green);
+        color: white;
+        border-color: var(--success-green);
+    }
+
+    .palette-btn.marked {
+        background: var(--warning-orange);
+        color: white;
+        border-color: var(--warning-orange);
+    }
+
+    .legend {
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .legend-item {
         display: flex;
         align-items: center;
-        gap: 16px;
-    }
-
-    .progress-label {
+        gap: 10px;
         font-size: 0.85rem;
-        color: #64748b;
-        white-space: nowrap;
+        color: var(--text-muted);
     }
 
-    .progress-bar-track {
-        flex: 1;
-        background: #e2e8f0;
-        border-radius: 99px;
-        height: 8px;
+    .legend-box {
+        width: 15px;
+        height: 15px;
+        border-radius: 3px;
     }
 
-    .progress-bar-fill {
-        height: 100%;
-        background: #2563eb;
-        border-radius: 99px;
-        transition: width 0.3s ease;
+    .btn-action {
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
-    /* Submit */
-    .submit-area {
-        text-align: center;
-        padding: 20px 0 10px;
+    .btn-prev,
+    .btn-next {
+        font-size: 0.9rem;
+    }
+
+    .btn-next {
+        background: var(--primary-teal);
+        color: white;
+        border: none;
+    }
+
+    .btn-next:hover {
+        opacity: 0.9;
+    }
+
+    .btn-review {
+        background: white;
+        color: var(--text-muted);
+    }
+
+    .btn-review.active {
+        background: #fff7ed;
+        color: var(--warning-orange);
+        border-color: var(--warning-orange);
     }
 
     .btn-submit {
-        background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+        width: 100%;
+        background: var(--primary-teal);
         color: white;
         border: none;
-        border-radius: 12px;
-        padding: 14px 48px;
-        font-size: 1.05rem;
+        padding: 15px;
+        border-radius: 10px;
         font-weight: 700;
-        cursor: pointer;
-        transition: opacity 0.2s;
-        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+        font-size: 1.1rem;
+        margin-top: auto;
     }
 
     .btn-submit:hover {
         opacity: 0.9;
+        cursor: pointer;
     }
 
-    /* Timer */
-    .timer-chip {
-        background: rgba(255, 255, 255, 0.15);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+    /* Custom Modal Styles */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+    }
+
+    .custom-modal {
+        background: white;
         border-radius: 20px;
-        padding: 6px 16px;
-        font-size: 1rem;
-        font-weight: 700;
-        font-variant-numeric: tabular-nums;
-        letter-spacing: 1px;
+        padding: 40px;
+        max-width: 450px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        position: relative;
     }
 
-    .timer-chip.warning {
-        background: rgba(239, 68, 68, 0.25);
-        border-color: rgba(239, 68, 68, 0.5);
+    .modal-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: #94a3b8;
+        cursor: pointer;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--dark-navy);
+        margin-bottom: 10px;
+    }
+
+    .modal-subtitle {
+        color: var(--text-muted);
+        margin-bottom: 30px;
+        line-height: 1.5;
+    }
+
+    .modal-buttons {
+        display: flex;
+        gap: 15px;
+    }
+
+    .btn-modal {
+        flex: 1;
+        padding: 12px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+    }
+
+    .btn-continue {
+        background: #f1f5f9;
+        color: var(--dark-navy);
+    }
+
+    .btn-confirm-submit {
+        background: var(--primary-teal);
+        color: white;
+    }
+
+    .btn-modal:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
     }
 </style>
 
-<div class="quiz-attempt-container">
-    <!-- Quiz Header -->
-    <div class="quiz-header">
-        <div>
-            <div style="font-size:0.8rem; opacity:0.75; margin-bottom:4px;">QUIZ</div>
-            <h1>{{ quiz.title }}</h1>
-        </div>
-        <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
-            {% if quiz.duration_minutes %}
-            <div class="timer-chip" id="quizTimer">{{ quiz.duration_minutes }}:00</div>
-            {% endif %}
-            <div class="quiz-meta-badges">
-                <span class="badge">{{ questions|length }} Questions</span>
-                <span class="badge">{{ quiz.total_marks }} Marks</span>
-            </div>
-        </div>
+<div class="quiz-layout">
+    <!-- Left: Questions -->
+    <div class="question-section">
+        <form id="quizForm" method="POST" action="{% url 'student_quiz_submit' quiz.id %}">
+            {% csrf_token %}
+
+            {% for q in questions %}
+            {% if forloop.first %}
+            <div class="question-container" id="q-{{ forloop.counter0 }}" style="display: block;">
+                {% else %}
+                <div class="question-container" id="q-{{ forloop.counter0 }}" style="display: none;">
+                    {% endif %}
+                    <div class="question-header">
+                        <h2>Question {{ forloop.counter }} of {{ questions.count }}</h2>
+                        <span class="marks-badge">{{ q.marks }} marks</span>
+                    </div>
+
+                    <div class="question-body">
+                        <div class="question-text">{{ q.text }}</div>
+
+                        <div class="options-container">
+                            <div class="option-box" data-q="{{ forloop.counter0 }}" data-opt="A">
+                                <div class="option-letter">A</div>
+                                <div class="option-text">{{ q.option_a }}</div>
+                                <input type="radio" name="question_{{ q.id }}" value="A" style="display: none;">
+                            </div>
+                            <div class="option-box" data-q="{{ forloop.counter0 }}" data-opt="B">
+                                <div class="option-letter">B</div>
+                                <div class="option-text">{{ q.option_b }}</div>
+                                <input type="radio" name="question_{{ q.id }}" value="B" style="display: none;">
+                            </div>
+                            <div class="option-box" data-q="{{ forloop.counter0 }}" data-opt="C">
+                                <div class="option-letter">C</div>
+                                <div class="option-text">{{ q.option_c }}</div>
+                                <input type="radio" name="question_{{ q.id }}" value="C" style="display: none;">
+                            </div>
+                            <div class="option-box" data-q="{{ forloop.counter0 }}" data-opt="D">
+                                <div class="option-letter">D</div>
+                                <div class="option-text">{{ q.option_d }}</div>
+                                <input type="radio" name="question_{{ q.id }}" value="D" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="mark_{{ q.id }}" id="mark-val-{{ forloop.counter0 }}" value="false">
+
+                    <div class="question-footer">
+                        {% if forloop.first %}
+                        <button type="button" class="btn-action btn-prev" onclick="changeQuestion(-1)"
+                            style="visibility: hidden;">
+                            {% else %}
+                            <button type="button" class="btn-action btn-prev" onclick="changeQuestion(-1)">
+                                {% endif %}
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg> Previous
+                            </button>
+
+                            <button type="button" class="btn-action btn-review" id="review-btn-{{ forloop.counter0 }}"
+                                onclick="toggleReview({{ forloop.counter0 }})">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polygon
+                                        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+                                    </polygon>
+                                </svg> Mark for Review
+                            </button>
+
+                            {% if not forloop.last %}
+                            <button type="button" class="btn-action btn-next" onclick="changeQuestion(1)">
+                                Next <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                            {% else %}
+                            <button type="button" class="btn-action btn-next" onclick="confirmSubmit()">
+                                Finish <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </button>
+                            {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <p>No questions available for this quiz.</p>
+                </div>
+                {% endfor %}
+        </form>
     </div>
 
-    <!-- Progress -->
-    <div class="progress-area">
-        <span class="progress-label" id="progressLabel">0 / {{ questions|length }} answered</span>
-        <div class="progress-bar-track">
-            <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+    <!-- Right: Sidebar -->
+    <div class="sidebar-section">
+        <div class="sidebar-card">
+            <div class="timer-label">Time Remaining</div>
+            <div class="timer-display" id="timer">00:00</div>
         </div>
-    </div>
 
-    <!-- Questions Form -->
-    <form method="POST" id="quizForm">
-        {% csrf_token %}
+        <div class="sidebar-card" style="flex-grow: 1;">
+            <div style="font-weight: 700; color: var(--dark-navy); margin-bottom: 15px;">Question Palette</div>
+            <div class="palette-grid">
+                {% for q in questions %}
+                <div class="palette-btn" id="pal-{{ forloop.counter0 }}"
+                    onclick="jumpToQuestion({{ forloop.counter0 }})">{{ forloop.counter }}</div>
+                {% endfor %}
+            </div>
 
-        {% for q in questions %}
-        <div class="question-card" id="qcard-{{ forloop.counter }}">
-            <div class="question-number">Question {{ forloop.counter }} of {{ questions|length }} &nbsp;·&nbsp; {{
-                q.marks }} Mark{% if q.marks != 1 %}s{% endif %}</div>
-            <div class="question-text">{{ q.text }}</div>
-
-            <div class="options-list">
-                <!-- Option A -->
-                <label class="option-label">
-                    <input type="radio" name="question_{{ q.id }}" value="A" onchange="updateProgress()">
-                    <div class="option-bubble">A</div>
-                    <div class="option-text">{{ q.option_a }}</div>
-                </label>
-                <!-- Option B -->
-                <label class="option-label">
-                    <input type="radio" name="question_{{ q.id }}" value="B" onchange="updateProgress()">
-                    <div class="option-bubble">B</div>
-                    <div class="option-text">{{ q.option_b }}</div>
-                </label>
-                <!-- Option C -->
-                <label class="option-label">
-                    <input type="radio" name="question_{{ q.id }}" value="C" onchange="updateProgress()">
-                    <div class="option-bubble">C</div>
-                    <div class="option-text">{{ q.option_c }}</div>
-                </label>
-                <!-- Option D -->
-                <label class="option-label">
-                    <input type="radio" name="question_{{ q.id }}" value="D" onchange="updateProgress()">
-                    <div class="option-bubble">D</div>
-                    <div class="option-text">{{ q.option_d }}</div>
-                </label>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-box" style="background: var(--success-green);"></div> Answered (<span
+                        id="count-answered">0</span>)
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: var(--warning-orange);"></div> Marked (<span
+                        id="count-marked">0</span>)
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: #f8fafc; border: 1px solid var(--border-color);"></div>
+                    Not visited (<span id="count-unvisited">{{ questions.count }}</span>)
+                </div>
             </div>
         </div>
-        {% endfor %}
 
-        <div class="submit-area">
-            <button type="submit" class="btn-submit" onclick="return confirmSubmit()">
-                ✓ &nbsp; Submit Quiz
-            </button>
-        </div>
-    </form>
+        <button type="button" class="btn-submit" onclick="confirmSubmit()">Submit Quiz</button>
+    </div>
 </div>
 
 <script>
-    const totalQuestions = {{ questions| length }};
+    let currentIdx = 0;
+    const totalQuestions = {{ questions.count }};
+    const questionStatus = new Array(totalQuestions).fill('unvisited'); // 'unvisited', 'visited', 'answered', 'marked'
+    const questionMarked = new Array(totalQuestions).fill(false);
+    const questionAnswered = new Array(totalQuestions).fill(false);
 
-    // --- Progress tracker ---
-    function updateProgress() {
-        const radios = document.querySelectorAll('#quizForm input[type="radio"]');
-        const names = new Set();
-        radios.forEach(r => { if (r.checked) names.add(r.name); });
-        const answered = names.size;
-        const pct = totalQuestions > 0 ? (answered / totalQuestions * 100) : 0;
-        document.getElementById('progressFill').style.width = pct + '%';
-        document.getElementById('progressLabel').textContent = answered + ' / ' + totalQuestions + ' answered';
-    }
+    // Timer Logic
+    let timeLeft = {{ quiz.duration_minutes }} * 60;
+    const timerEl = document.getElementById('timer');
 
-    // --- Confirm submit ---
-    function confirmSubmit() {
-        const radios = document.querySelectorAll('#quizForm input[type="radio"]');
-        const names = new Set();
-        radios.forEach(r => { if (r.checked) names.add(r.name); });
-        const answered = names.size;
-        const unanswered = totalQuestions - answered;
-        if (unanswered > 0) {
-            return confirm('You have ' + unanswered + ' unanswered question(s). Submit anyway?');
+    const timerInterval = setInterval(() => {
+        const mins = Math.floor(timeLeft / 60);
+        const secs = timeLeft % 60;
+        timerEl.textContent = `${chars(mins)}:${chars(secs)}`;
+
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            autoSubmit();
         }
-        return true;
-    }
-
-    // --- Countdown timer ---
-    {% if quiz.duration_minutes %}
-    (function () {
-        let seconds = {{ quiz.duration_minutes }
-    } * 60;
-    const timerEl = document.getElementById('quizTimer');
-    const interval = setInterval(function () {
-        seconds--;
-        if (seconds <= 0) {
-            clearInterval(interval);
-            document.getElementById('quizForm').submit();
-            return;
-        }
-        const m = Math.floor(seconds / 60);
-        const s = seconds % 60;
-        timerEl.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-        if (seconds <= 60) timerEl.classList.add('warning');
+        timeLeft--;
     }, 1000);
-    }) ();
-    {% endif %}
 
-    // Re-render MathJax after dynamic content is ready
-    document.addEventListener('DOMContentLoaded', function () {
-        if (window.MathJax && MathJax.typesetPromise) {
-            MathJax.typesetPromise();
+    function chars(n) { return n < 10 ? '0' + n : n; }
+
+    function autoSubmit() {
+        // Prepare for auto-submit
+        document.getElementById('modalSubtitle').textContent = "Time is up! Your quiz will be submitted automatically.";
+        // Directly submit without showing modal or just show it for a split second
+        document.getElementById('quizForm').submit();
+    }
+
+    function confirmSubmit() {
+        // Calculate answered count
+        let answered = 0;
+        for (let i = 0; i < totalQuestions; i++) {
+            if (questionAnswered[i]) answered++;
         }
+
+        const subtitle = document.getElementById('modalSubtitle');
+        subtitle.textContent = `You have answered ${answered} out of ${totalQuestions} questions.`;
+
+        document.getElementById('submitModal').style.display = 'flex';
+    }
+
+    function closeSubmitModal() {
+        document.getElementById('submitModal').style.display = 'none';
+    }
+
+    function submitFinalQuiz() {
+        document.getElementById('quizForm').submit();
+    }
+
+    // Navigation
+    function changeQuestion(dir) {
+        const nextIdx = currentIdx + dir;
+        if (nextIdx >= 0 && nextIdx < totalQuestions) {
+            jumpToQuestion(nextIdx);
+        }
+    }
+
+    function jumpToQuestion(idx) {
+        // Hide current
+        document.getElementById(`q-${currentIdx}`).style.display = 'none';
+        document.getElementById(`pal-${currentIdx}`).classList.remove('active');
+
+        // Mark as visited if not already something else
+        if (questionStatus[currentIdx] === 'unvisited') {
+            questionStatus[currentIdx] = 'visited';
+        }
+
+        // Show new
+        currentIdx = idx;
+        document.getElementById(`q-${currentIdx}`).style.display = 'block';
+        document.getElementById(`pal-${currentIdx}`).classList.add('active');
+
+        updatePalette();
+
+        // Ask MathJax to re-render the new question
+        if (window.MathJax && MathJax.typesetPromise) {
+            MathJax.typesetPromise([document.getElementById(`q-${currentIdx}`)]);
+        }
+    }
+
+    // Option Selection
+    document.querySelectorAll('.option-box').forEach(box => {
+        box.addEventListener('click', function () {
+            const qIdx = parseInt(this.getAttribute('data-q'));
+            const optVal = this.getAttribute('data-opt');
+
+            // Unselect others in same question
+            const container = this.closest('.options-container');
+            container.querySelectorAll('.option-box').forEach(b => b.classList.remove('selected'));
+
+            // Select this one
+            this.classList.add('selected');
+            this.querySelector('input').checked = true;
+
+            questionAnswered[qIdx] = true;
+            updatePalette();
+        });
     });
+
+    function toggleReview(idx) {
+        questionMarked[idx] = !questionMarked[idx];
+        const btn = document.getElementById(`review-btn-${idx}`);
+        const hiddenInput = document.getElementById(`mark-val-${idx}`);
+
+        if (questionMarked[idx]) {
+            btn.classList.add('active');
+            hiddenInput.value = "true";
+        } else {
+            btn.classList.remove('active');
+            hiddenInput.value = "false";
+        }
+        updatePalette();
+    }
+
+    function updatePalette() {
+        let answered = 0;
+        let marked = 0;
+        let unvisited = 0;
+
+        for (let i = 0; i < totalQuestions; i++) {
+            const btn = document.getElementById(`pal-${i}`);
+            btn.classList.remove('answered', 'marked');
+
+            if (questionMarked[i]) {
+                btn.classList.add('marked');
+                marked++;
+            } else if (questionAnswered[i]) {
+                btn.classList.add('answered');
+                answered++;
+            } else if (questionStatus[i] === 'unvisited') {
+                unvisited++;
+            }
+        }
+
+        document.getElementById('count-answered').textContent = answered;
+        document.getElementById('count-marked').textContent = marked;
+        document.getElementById('count-unvisited').textContent = unvisited;
+    }
+
+    // Initialize
+    updatePalette();
+    document.getElementById('pal-0').classList.add('active');
+
 </script>
+
+<!-- Custom Submit Modal -->
+<div class="modal-overlay" id="submitModal">
+    <div class="custom-modal">
+        <button class="modal-close" onclick="closeSubmitModal()">&times;</button>
+        <div class="modal-title">Submit Quiz?</div>
+        <div class="modal-subtitle" id="modalSubtitle">
+            You have answered 0 out of 0 questions.
+        </div>
+        <div class="modal-buttons">
+            <button type="button" class="btn-modal btn-continue" onclick="closeSubmitModal()">Continue Quiz</button>
+            <button type="button" class="btn-modal btn-confirm-submit" onclick="submitFinalQuiz()">Submit Now</button>
+        </div>
+    </div>
+</div>
 {% endblock %}

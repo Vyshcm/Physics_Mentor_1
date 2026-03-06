@@ -163,12 +163,13 @@ class ExamSubmissionForm(forms.ModelForm):
 class QuizCreationForm(forms.ModelForm):
     class Meta:
         model = Quiz
-        fields = ['title', 'description', 'total_marks', 'duration_minutes', 'due_date', 'standard']
+        fields = ['title', 'description', 'total_marks', 'duration_minutes', 'start_time', 'due_date', 'standard']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Quiz Title'}),
             'description': forms.Textarea(attrs={'class': 'form-textarea', 'placeholder': 'Quiz Description...', 'rows': 3}),
             'total_marks': forms.NumberInput(attrs={'class': 'form-input', 'placeholder': 'Total Marks'}),
             'duration_minutes': forms.NumberInput(attrs={'class': 'form-input', 'placeholder': 'Duration in minutes'}),
+            'start_time': forms.DateTimeInput(attrs={'class': 'form-input', 'type': 'datetime-local'}),
             'due_date': forms.DateTimeInput(attrs={'class': 'form-input', 'type': 'datetime-local'}),
             'standard': forms.Select(attrs={'class': 'form-input'}),
         }
