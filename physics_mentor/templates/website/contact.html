@@ -1,4 +1,4 @@
-python {% extends "base.html" %}
+{% extends "base.html" %}
 {% load static %}
 
 {% block extra_css %}
@@ -23,7 +23,7 @@ python {% extends "base.html" %}
         <p>
           PhysicsMentor <br>
           Online Learning Platform <br>
-          GCC Countries & India
+          Kottayam
         </p>
       </div>
 
@@ -31,7 +31,7 @@ python {% extends "base.html" %}
         <div class="c-icon">📞</div>
         <h4>Contact</h4>
         <p>
-          
+
           +91 7306737811
         </p>
       </div>
@@ -39,7 +39,7 @@ python {% extends "base.html" %}
       <div class="c-card">
         <div class="c-icon">✉️</div>
         <h4>Email</h4>
-        <p>support@physicsmentor.com</p>
+        <p>vyshnavycm@gmail.com</p>
       </div>
     </div>
 
@@ -48,7 +48,7 @@ python {% extends "base.html" %}
 
       <!-- Left Image -->
       <div class="contact-img">
-        <img src="{% static 'images/contact_image.jpeg' %}" alt="Contact Image">
+        <img src="{% static 'images/contactus_girl.png' %}" alt="Contact Image">
       </div>
 
       <!-- Right Form -->
@@ -56,59 +56,59 @@ python {% extends "base.html" %}
         <h3>Get In Touch</h3>
 
         <form method="post">
-  {% csrf_token %}
+          {% csrf_token %}
 
-  <div class="f-col">
-    {{ form.full_name.label_tag }}
-    {{ form.full_name }}
-  </div>
+          <div class="f-col">
+            {{ form.full_name.label_tag }}
+            {{ form.full_name }}
+          </div>
 
-  <div class="f-col">
-    {{ form.email.label_tag }}
-    {{ form.email }}
-  </div>
+          <div class="f-col">
+            {{ form.email.label_tag }}
+            {{ form.email }}
+          </div>
 
-  <div class="f-col">
-    {{ form.country.label_tag }}
-    {{ form.country }}
-  </div>
+          <div class="f-col">
+            {{ form.country.label_tag }}
+            {{ form.country }}
+          </div>
 
-  <div class="f-col">
-    {{ form.phone.label_tag }}
-    {{ form.phone }}
-  </div>
+          <div class="f-col">
+            {{ form.phone.label_tag }}
+            {{ form.phone }}
+          </div>
 
-  <div class="f-col">
-    {{ form.student_class.label_tag }}
-    {{ form.student_class }}
-  </div>
+          <div class="f-col">
+            {{ form.student_class.label_tag }}
+            {{ form.student_class }}
+          </div>
 
-  <div class="f-col">
-    {{ form.subject.label_tag }}
-    {{ form.subject }}
-  </div>
+          <div class="f-col">
+            {{ form.subject.label_tag }}
+            {{ form.subject }}
+          </div>
 
-  <div class="f-col">
-    {{ form.place.label_tag }}
-    {{ form.place }}
-  </div>
+          <div class="f-col">
+            {{ form.place.label_tag }}
+            {{ form.place }}
+          </div>
 
-  <div class="f-col">
-    {{ form.tuition_type.label_tag }}
-    {{ form.tuition_type }}
-  </div>
+          <div class="f-col">
+            {{ form.tuition_type.label_tag }}
+            {{ form.tuition_type }}
+          </div>
 
-  <div class="f-col">
-    {{ form.message.label_tag }}
-    {{ form.message }}
-  </div>
+          <div class="f-col">
+            {{ form.message.label_tag }}
+            {{ form.message }}
+          </div>
 
-  <button type="submit" class="send-btn">SEND MESSAGE</button>
+          <button type="submit" class="send-btn">SEND MESSAGE</button>
 
-  {% if success %}
-    <p class="small-note" style="color: green;">Message sent successfully!</p>
-  {% endif %}
-</form>
+          {% if success %}
+          <p class="small-note" style="color: green;">Message sent successfully!</p>
+          {% endif %}
+        </form>
 
 
         {% if success %}
@@ -138,7 +138,7 @@ python {% extends "base.html" %}
     // map your dropdown values -> ISO2 codes used by intl-tel-input
     const COUNTRY_ISO_MAP = {
       "India": "in",
-      "UAE (Dubai)": "ae",
+      "UAE": "ae",
       "Oman": "om",
       "Qatar": "qa",
       "Saudi Arabia": "sa",
@@ -149,10 +149,29 @@ python {% extends "base.html" %}
 
     const iti = window.intlTelInput(phoneInput, {
       initialCountry: "ae",
-      separateDialCode: true,
+      separateDialCode: false,
+      nationalMode: false,
+      autoPlaceholder: "aggressive",
       preferredCountries: ["ae", "in", "om", "qa", "sa", "kw", "bh"],
       utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/js/utils.js"
     });
+
+    // ✅ Update dial code when country changes
+    phoneInput.addEventListener('countrychange', function () {
+      const countryData = iti.getSelectedCountryData();
+      if (countryData.dialCode) {
+        phoneInput.value = "+" + countryData.dialCode + " ";
+      }
+    });
+
+    // ✅ Rename "UAE (Dubai)" to "UAE" (as requested)
+    if (countrySelect) {
+      Array.from(countrySelect.options).forEach(option => {
+        if (option.text.trim() === "UAE (Dubai)") {
+          option.text = "UAE";
+        }
+      });
+    }
 
     // ✅ when country dropdown changes, update phone input country automatically
     if (countrySelect) {
@@ -168,9 +187,30 @@ python {% extends "base.html" %}
       countrySelect.addEventListener("change", setByDropdown);
     }
 
-    // ✅ save full international number in DB (ex: +968xxxxxxxx)
+    // ✅ remove "Class 9" from dropdown (as requested)
+    const classSelect = document.querySelector("#id_student_class");
+    if (classSelect) {
+      Array.from(classSelect.options).forEach(option => {
+        if (option.text.includes("Class 9") || option.value === "Class 9" || option.value === "9") {
+          option.remove();
+        }
+      });
+    }
+
+    // ✅ save full international number in DB
+    // Since nationalMode: false and separateDialCode: false, the value already has the dial code.
+    // We just ensure it's clean before submission.
     phoneInput.form.addEventListener("submit", function () {
-      phoneInput.value = iti.getNumber();
+      if (iti.isValidNumber()) {
+        phoneInput.value = iti.getNumber();
+      }
+    });
+
+    // ✅ Fix for 403 Forbidden / Back Button CSRF issue
+    window.addEventListener("pageshow", function (event) {
+      if (event.persisted) {
+        window.location.reload();
+      }
     });
   });
 </script>
