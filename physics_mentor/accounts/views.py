@@ -386,13 +386,14 @@ def parent_dashboard_view(request):
         exam_perf = None
 
     # 3. Attendance Metrics
-    attendances = Attendance.objects.filter(student=student)
-    total_days = attendances.count()
-    if total_days > 0:
-        present_days = attendances.filter(status='Present').count()
-        attendance_pct = round((present_days / total_days) * 100, 1)
-    else:
-        attendance_pct = None
+    attendance_records = Attendance.objects.filter(student=student).order_by('-date')
+    total_days = attendance_records.count()
+    present_days = attendance_records.filter(status='Present').count()
+    absent_days = attendance_records.filter(status='Absent').count()
+    late_days = attendance_records.filter(status='Late').count()
+    
+    attended_days = present_days + late_days
+    attendance_pct = round((attended_days / total_days) * 100) if total_days > 0 else 0
 
     # 4. Assignments Metrics
     total_assignments = Assignment.objects.all()
@@ -469,6 +470,11 @@ def parent_dashboard_view(request):
         'quiz_perf': quiz_perf,
         'exam_perf': exam_perf,
         'attendance_pct': attendance_pct,
+        'attendance_total': total_days,
+        'attendance_present': present_days,
+        'attendance_absent': absent_days,
+        'attendance_late': late_days,
+        'attendance_attended': attended_days,
         'assignments': assignments,
         'payment_history': payment_history,
         'messages_list': messages_list,
